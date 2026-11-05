@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup — PayPal Invoice Copilot</title>
+<meta name="description" content="Setup for PayPal Invoice Copilot.">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero"><div class="eyebrow">PayPal Invoice Copilot</div><h1>Setup</h1>
+    <p class="lead">Credentials checklist and demo quick start — rendered from docs/setup.md. Source: <code>docs/setup.md</code>.</p></header>
+  <section class="card" id="content" aria-live="polite"><p class="sub">Loading…</p></section>
+</div>
+<script type="module">
+import { renderNav, loadText, mdToHTML, fail } from "./assets/docs.js";
+renderNav();
+const el = document.getElementById("content");
+loadText("setup.md").then((md) => { el.innerHTML = mdToHTML(md); }).catch((e) => fail(el, e));
+</script>
+</body>
+</html>

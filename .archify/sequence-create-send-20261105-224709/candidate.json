@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Create and send invoice sequence",
+    "subtitle": "Chat \u2192 draft \u2192 human confirm \u2192 PayPal",
+    "output": "docs/diagrams/sequence-create-send.html",
+    "column_fit": "spread",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Freelancer",
+      "sublabel": "chat request"
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Chat UI",
+      "sublabel": "ChatPanel"
+    },
+    {
+      "id": "chat",
+      "type": "backend",
+      "label": "/api/chat",
+      "sublabel": "demo or LLM"
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Invoice tools",
+      "sublabel": "paypal-tools"
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Store",
+      "sublabel": "mock or PayPal"
+    },
+    {
+      "id": "confirm",
+      "type": "security",
+      "label": "Confirm",
+      "sublabel": "/api/confirm"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 300,
+      "label": "Draft"
+    },
+    {
+      "from": 310,
+      "to": 410,
+      "label": "Human gate"
+    },
+    {
+      "from": 420,
+      "to": 545,
+      "label": "Send"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "user",
+      "to": "ui",
+      "y": 160,
+      "label": "Invoice Acme $500\u2026",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "ui",
+      "to": "chat",
+      "y": 192,
+      "label": "POST /api/chat",
+      "variant": "default"
+    },
+    {
+      "id": "m3",
+      "from": "chat",
+      "to": "tools",
+      "y": 224,
+      "label": "create_invoice",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m4",
+      "from": "tools",
+      "to": "store",
+      "y": 256,
+      "label": "persist DRAFT",
+      "variant": "default"
+    },
+    {
+      "id": "m5",
+      "from": "store",
+      "to": "tools",
+      "y": 288,
+      "label": "invoice id",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "tools",
+      "to": "ui",
+      "y": 328,
+      "label": "draft + ConfirmCard",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "ui",
+      "to": "user",
+      "y": 360,
+      "label": "show confirm",
+      "variant": "security"
+    },
+    {
+      "id": "m8",
+      "from": "user",
+      "to": "ui",
+      "y": 392,
+      "label": "Confirm send",
+      "variant": "security"
+    },
+    {
+      "id": "m9",
+      "from": "ui",
+      "to": "confirm",
+      "y": 432,
+      "label": "POST confirm",
+      "variant": "security"
+    },
+    {
+      "id": "m10",
+      "from": "confirm",
+      "to": "tools",
+      "y": 464,
+      "label": "execute pending",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m11",
+      "from": "tools",
+      "to": "store",
+      "y": 496,
+      "label": "send \u2192 SENT",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m12",
+      "from": "store",
+      "to": "ui",
+      "y": 528,
+      "label": "desk refresh",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "ui",
+      "from": 160,
+      "to": 535,
+      "type": "frontend"
+    },
+    {
+      "participant": "chat",
+      "from": 192,
+      "to": 300,
+      "type": "backend"
+    },
+    {
+      "participant": "tools",
+      "from": 224,
+      "to": 295,
+      "type": "backend"
+    },
+    {
+      "participant": "store",
+      "from": 256,
+      "to": 295,
+      "type": "database"
+    },
+    {
+      "participant": "confirm",
+      "from": 432,
+      "to": 500,
+      "type": "security"
+    },
+    {
+      "participant": "tools",
+      "from": 464,
+      "to": 520,
+      "type": "backend"
+    },
+    {
+      "participant": "store",
+      "from": 496,
+      "to": 530,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Draft first",
+      "items": [
+        "create_invoice never emails the client",
+        "Demo agent and LLM tools share the same tool surface",
+        "PendingAction is stored until the user decides"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Confirm before send",
+      "items": [
+        "send_invoice returns needs_confirmation",
+        "Only /api/confirm with confirmed=true runs the side effect",
+        "Cancel discards the pending action"
+      ]
+    }
+  ]
+}

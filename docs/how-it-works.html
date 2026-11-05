@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How PayPal Invoice Copilot works</title>
+<meta name="description" content="Animated workflow: chat → agent → tool call → human confirm → PayPal → desk.">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">PayPal Invoice Copilot</div>
+    <h1>How it works</h1>
+    <p class="lead">A freelancer chats a billing intent. The agent drafts a PayPal invoice, pauses on a confirmation card for send / remind / cancel, then updates the invoice desk with status, payment link, and QR.</p>
+  </header>
+
+  <section class="card flow playing" id="flow" aria-labelledby="h-flow">
+    <h2 id="h-flow">Animated overview</h2>
+    <p class="sub">Packets follow the main path. Pause anytime if motion is distracting.</p>
+    <svg viewBox="0 0 980 220" role="img" aria-label="User chat to agent to tools to confirm to PayPal to desk.">
+      <path id="w1" class="wire" d="M130 110 H250"/>
+      <path id="w2" class="wire" d="M370 110 H490"/>
+      <path id="w3" class="wire" d="M610 110 H730"/>
+      <path id="w4" class="wire" d="M850 110 H930"/>
+      <g><rect x="20" y="80" width="110" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="75" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Chat</text></g>
+      <g><rect x="250" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="310" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Agent</text></g>
+      <g><rect x="490" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="550" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Tools</text></g>
+      <g><rect x="730" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="790" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Confirm</text></g>
+      <g><rect x="850" y="160" width="110" height="44" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="905" y="187" text-anchor="middle" fill="var(--text)" font-size="12">PayPal</text></g>
+      <path id="w5" class="wire" d="M790 140 V160 H905"/>
+      <g aria-hidden="true">
+        <circle class="packet" r="5"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.4s" begin=".35s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.4s" begin=".7s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.4s" begin="1.05s" repeatCount="indefinite"><mpath href="#w5"/></animateMotion></circle>
+      </g>
+    </svg>
+    <div class="toolbar"><button class="btn" id="flowToggle">⏸ Pause animation</button></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-wf">
+    <h2 id="h-wf">Workflow diagram</h2>
+    <p class="sub">Archify workflow with trace animation — chat → draft → ConfirmCard → send → desk.</p>
+    <div class="frame"><iframe src="diagrams/workflow-main.html" title="Main workflow" loading="lazy"></iframe></div>
+    <div class="frame-note"><a href="diagrams/workflow-main.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-seq">
+    <h2 id="h-seq">Create + send sequence</h2>
+    <div class="frame"><iframe src="diagrams/sequence-create-send.html" title="Create and send sequence" loading="lazy"></iframe></div>
+    <div class="frame-note"><a href="diagrams/sequence-create-send.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  </section>
+
+  <section class="card" id="steps" aria-labelledby="h-steps">
+    <h2 id="h-steps">Step player</h2>
+    <p class="sub">Play or step through one create-and-send request.</p>
+    <svg data-stage role="img" aria-label="Step player for create and send"></svg>
+    <div class="step-info" aria-live="polite"><div data-no>1</div><div><div data-phase></div><h3 data-title></h3><div data-desc></div></div></div>
+    <div class="toolbar"><button class="btn" data-prev aria-label="Previous">←</button><button class="btn primary" data-play>▶ Play</button><button class="btn" data-next aria-label="Next">→</button><div data-dots></div></div>
+  </section>
+</div>
+<script type="module">
+import { renderNav, stepPlayer, pauseToggle } from "./assets/docs.js";
+renderNav();
+pauseToggle(document.getElementById("flow"), document.getElementById("flowToggle"));
+stepPlayer(document.getElementById("steps"), {
+  participants: [
+    { id: "user", label: "Freelancer", sub: "chat" },
+    { id: "api", label: "/api/chat", sub: "demo/LLM" },
+    { id: "tools", label: "Tools", sub: "paypal-tools" },
+    { id: "confirm", label: "Confirm", sub: "/api/confirm" },
+    { id: "paypal", label: "PayPal", sub: "sandbox/mock" },
+  ],
+  steps: [
+    ["Ask", "user", "api", "Invoice Acme $500…", "", "Natural-language billing intent from ChatPanel."],
+    ["Draft", "api", "tools", "create_invoice", "", "Demo agent or AI SDK calls create_invoice; status stays DRAFT."],
+    ["Propose", "tools", "user", "ConfirmCard", "ret", "send_invoice returns needs_confirmation — no email yet."],
+    ["Gate", "user", "confirm", "Confirm send", "", "Freelancer accepts the human-in-the-loop card."],
+    ["Send", "confirm", "paypal", "executePendingAction", "", "Mock store or @paypal/agent-toolkit marks the invoice SENT."],
+    ["Desk", "paypal", "user", "status + QR", "ret", "Invoice desk refreshes unpaid totals and payment link."],
+  ],
+});
+</script>
+</body>
+</html>

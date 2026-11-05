@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# nested (Remotion video/)
+node_modules/
+video/node_modules/
+video/out/
+.remotion/

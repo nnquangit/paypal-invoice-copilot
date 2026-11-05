@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Invoice Copilot main workflow",
+    "subtitle": "Chat → agent → draft → human confirm → PayPal",
+    "output": "docs/diagrams/workflow-main.html",
+    "animation": "trace",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "lanes": [
+    { "id": "user", "label": "Freelancer + UI" },
+    { "id": "agent", "label": "Agent + tools" },
+    { "id": "gate", "label": "Human gate", "variant": "exception" },
+    { "id": "paypal", "label": "PayPal / mock" }
+  ],
+  "phases": [
+    { "id": "ask", "label": "Ask", "fromCol": 0, "toCol": 1 },
+    { "id": "draft", "label": "Draft", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "act", "label": "Confirm + send", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "agent_work", "label": "Intent + tools", "lane": "agent", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "confirm_group", "label": "Destructive actions", "lane": "gate", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["ask", "chat", "route", "tool", "confirm", "exec", "qr", "desk"],
+  "nodes": [
+    { "id": "ask", "lane": "user", "col": 0, "type": "external", "label": "Ask in chat", "sublabel": "natural language", "width": 168 },
+    { "id": "chat", "lane": "user", "col": 1, "type": "frontend", "label": "ChatPanel", "sublabel": "POST /api/chat", "width": 168 },
+    { "id": "desk", "lane": "user", "col": 5, "type": "frontend", "label": "Invoice desk", "sublabel": "status + QR", "width": 168 },
+    { "id": "route", "lane": "agent", "col": 2, "type": "backend", "label": "Agent runtime", "sublabel": "demo or LLM", "tag": "maxSteps 6", "width": 168 },
+    { "id": "tool", "lane": "agent", "col": 3, "type": "backend", "label": "create_invoice", "sublabel": "DRAFT only", "width": 168 },
+    { "id": "confirm", "lane": "gate", "col": 4, "type": "security", "label": "ConfirmCard", "sublabel": "send / remind / cancel", "tag": "human yes/no", "width": 168 },
+    { "id": "denied", "lane": "gate", "col": 5, "type": "security", "label": "Cancelled", "sublabel": "discard pending", "width": 168 },
+    { "id": "store", "lane": "paypal", "col": 3, "type": "database", "label": "Invoice store", "sublabel": "DRAFT saved", "width": 168 },
+    { "id": "exec", "lane": "paypal", "col": 4, "type": "cloud", "label": "send_invoice", "sublabel": "mock or toolkit", "width": 168 },
+    { "id": "qr", "lane": "paypal", "col": 5, "type": "database", "label": "QR / link", "sublabel": "payment deep link", "width": 168 }
+  ],
+  "edges": [
+    { "id": "e1", "from": "ask", "to": "chat", "variant": "emphasis" },
+    { "id": "e2", "from": "chat", "to": "route", "label": "intent", "variant": "emphasis" },
+    { "id": "e3", "from": "route", "to": "tool", "label": "tool call" },
+    { "id": "e4", "from": "tool", "to": "store", "label": "DRAFT", "variant": "dashed", "role": "branch" },
+    { "id": "e5", "from": "tool", "to": "confirm", "label": "needs confirm", "variant": "security" },
+    { "id": "e6", "from": "confirm", "to": "exec", "label": "yes", "variant": "emphasis" },
+    { "id": "e7", "from": "confirm", "to": "denied", "label": "no", "variant": "security", "role": "error" },
+    { "id": "e8", "from": "exec", "to": "qr", "label": "SENT", "variant": "dashed" },
+    { "id": "e9", "from": "qr", "to": "desk", "label": "refresh", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Main path",
+      "items": [
+        "Freelancer asks in chat; agent drafts a PayPal invoice",
+        "Destructive actions pause on ConfirmCard",
+        "Desk shows SENT status, amount, and payment link"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Safety",
+      "items": [
+        "PendingAction blocks email until confirmation",
+        "Rejecting the card consumes the pending action",
+        "Live toolkit used only when PayPal keys exist"
+      ]
+    }
+  ]
+}

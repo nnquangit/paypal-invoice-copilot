@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PayPal Invoice Copilot docs</title>
+<meta name="description" content="Reader docs for PayPal Invoice Copilot: architecture, how it works, setup, and diagrams.">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">PayPal AI Hackathon · reader docs</div>
+    <h1>PayPal Invoice Copilot</h1>
+    <p class="lead">Chat-based AI agent that creates, sends, reminds, cancels, and tracks <b>PayPal invoices</b> for freelancers. Natural language in → draft invoice → <b>human confirmation</b> → PayPal Invoicing API (sandbox or mock) → live invoice desk with QR / payment links.</p>
+  </header>
+
+  <section class="card" aria-labelledby="h-arch">
+    <h2 id="h-arch">Architecture</h2>
+    <p class="sub">Interactive diagram from the real Next.js call sites. Hover nodes to highlight routes; use Live for the trace animation.</p>
+    <div class="frame"><iframe src="diagrams/architecture.html" title="Architecture diagram" loading="lazy"></iframe></div>
+    <div class="frame-note"><a href="diagrams/architecture.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-life">
+    <h2 id="h-life">Invoice lifecycle</h2>
+    <p class="sub">DRAFT → SENT → PAID / CANCELLED, with confirmation-gated reminders.</p>
+    <div class="frame"><iframe src="diagrams/lifecycle-invoice.html" title="Invoice lifecycle" loading="lazy"></iframe></div>
+    <div class="frame-note"><a href="diagrams/lifecycle-invoice.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-pages">
+    <h2 id="h-pages">Pages</h2>
+    <div class="grid" id="pages"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-run">
+    <h2 id="h-run">Quick start</h2>
+    <pre><code>npm install
+npm run dev
+# open http://localhost:3000 — works with zero credentials</code></pre>
+    <p class="sub">View these docs: run <code>python3 -m http.server 4590</code> at the repo root, then open <code>http://127.0.0.1:4590/docs/</code>. Also works on GitHub Pages from the <code>docs/</code> folder.</p>
+  </section>
+  <footer>Pages load live sources from the repo. Diagram candidates live under <code>.archify/</code> for regeneration.</footer>
+</div>
+<script type="module">
+import { renderNav, PAGES } from "./assets/docs.js";
+renderNav();
+document.getElementById("pages").innerHTML = PAGES.filter(([h]) => h !== "index.html")
+  .map(([href, label]) => `<a class="mini" href="${href}"><h3>${label}</h3><p>${href}</p></a>`).join("");
+</script>
+</body>
+</html>

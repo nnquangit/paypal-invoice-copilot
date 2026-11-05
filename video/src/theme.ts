@@ -1,0 +1,15 @@
+export const colors = {
+  bg: "#0B1220",
+  bgAlt: "#111827",
+  panel: "#152033",
+  border: "rgba(148, 163, 184, 0.25)",
+  text: "#F8FAFC",
+  muted: "#94A3B8",
+  accent: "#0070E0",
+  accentSoft: "#38BDF8",
+  paypal: "#003087",
+  paypalGold: "#FFC43A",
+  success: "#22C55E",
+  warn: "#F59E0B",
+  danger: "#F87171",
+};

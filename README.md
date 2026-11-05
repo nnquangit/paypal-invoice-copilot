@@ -121,11 +121,32 @@ src/
   components/          # Chat, confirm cards, invoice desk
   lib/                 # config, mock store, PayPal tools, demo agent, LLM
 docs/
+  index.html           # HTML docs portal + Archify diagrams
   DEMO_SCRIPT.md       # <3 min video script
   SUBMISSION.md        # Devpost submission text
+video/                 # Remotion explainer (not part of Next build)
 tests/                 # Vitest (mock PayPal)
 ```
 
 ## License
 
 MIT © Quang Ngo
+
+<!-- docs-workflow -->
+## Docs (HTML)
+
+Interactive reader docs with Archify diagrams and an animated how-it-works flow:
+
+- Portal: [docs/index.html](docs/index.html)
+- How it works: [docs/how-it-works.html](docs/how-it-works.html)
+- Setup: [docs/setup.html](docs/setup.html)
+
+Serve from the repo root:
+
+```bash
+python3 -m http.server 4590
+# open http://127.0.0.1:4590/docs/
+```
+
+Explainer video (Remotion, excluded from the Next.js build): see [`video/`](video/). Rendered MP4 lives outside the app build at `/workspace/out/invoice-copilot-explainer.mp4` when produced on the agent box.
+
