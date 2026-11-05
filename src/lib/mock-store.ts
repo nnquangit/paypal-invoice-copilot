@@ -129,6 +129,7 @@ export function createInvoice(input: {
   due_days?: number;
   items: Array<{ name: string; quantity?: number | string; unit_price: number | string; description?: string }>;
 }): Invoice {
+  store(); // ensure seed + invoice sequence are initialized before nextNumber()
   const currency = input.currency_code || "USD";
   const items: InvoiceItem[] = input.items.map((it) => ({
     name: it.name,
