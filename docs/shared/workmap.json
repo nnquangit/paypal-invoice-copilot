@@ -90,6 +90,13 @@
               "name": "Render MP4 + poster PNG",
               "status": "done",
               "note": "/workspace/out/"
+            },
+            {
+              "level": "task",
+              "name": "English VO + ambient music",
+              "status": "done",
+              "at": "2026-11-05",
+              "note": "en-US-AndrewNeural; 65s AAC; bg ffmpeg pad"
             }
           ]
         }

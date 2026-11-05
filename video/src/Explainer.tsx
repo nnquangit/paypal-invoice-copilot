@@ -1,38 +1,70 @@
 import React from "react";
-import { AbsoluteFill, Series } from "remotion";
+import {
+  AbsoluteFill,
+  Audio,
+  Sequence,
+  Series,
+  staticFile,
+} from "remotion";
 import { TitleScene } from "./scenes/Title";
 import { ProblemScene } from "./scenes/Problem";
 import { SolutionScene } from "./scenes/Solution";
 import { FlowScene } from "./scenes/Flow";
 import { StackScene } from "./scenes/Stack";
 import { OutroScene } from "./scenes/Outro";
+import { CaptionsOverlay } from "./CaptionsOverlay";
+import { sceneCaptions } from "./captions-data";
 import { colors } from "./theme";
+import {
+  BG_MUSIC,
+  BG_VOLUME,
+  SCENES,
+  TOTAL_FRAMES,
+  VO_LEAD_FRAMES,
+  VO_VOLUME,
+} from "./timing";
 
-/** 30fps · ~75s · 1920×1080 */
-export const TOTAL_FRAMES = 30 * 75;
+export { TOTAL_FRAMES };
+
+const SCENE_COMPONENTS = [
+  TitleScene,
+  ProblemScene,
+  SolutionScene,
+  FlowScene,
+  StackScene,
+  OutroScene,
+] as const;
 
 export const Explainer: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+      <Audio
+        src={staticFile(BG_MUSIC)}
+        volume={BG_VOLUME}
+        name="Background music"
+      />
       <Series>
-        <Series.Sequence durationInFrames={240}>
-          <TitleScene />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={240}>
-          <ProblemScene />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={240}>
-          <SolutionScene />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={360}>
-          <FlowScene />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={240}>
-          <StackScene />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={330}>
-          <OutroScene />
-        </Series.Sequence>
+        {SCENES.map((scene, i) => {
+          const Comp = SCENE_COMPONENTS[i];
+          const caps = sceneCaptions[scene.captionKey];
+          return (
+            <Series.Sequence
+              key={scene.id}
+              durationInFrames={scene.durationInFrames}
+              name={scene.id}
+            >
+              <Comp />
+              <Sequence from={VO_LEAD_FRAMES} layout="none">
+                <Audio
+                  src={staticFile(scene.vo)}
+                  volume={VO_VOLUME}
+                  name={`VO ${scene.id}`}
+                />
+              </Sequence>
+              <CaptionsOverlay captions={caps} leadFrames={VO_LEAD_FRAMES} />
+            </Series.Sequence>
+          );
+        })}
       </Series>
     </AbsoluteFill>
   );

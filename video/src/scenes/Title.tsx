@@ -12,7 +12,7 @@ import { colors } from "../theme";
 
 export const TitleScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
   const badgeIn = spring({ frame, fps, config: { damping: 200 } });
   const titleIn = spring({
@@ -25,10 +25,12 @@ export const TitleScene: React.FC = () => {
     fps,
     config: { damping: 200 },
   });
-  const fadeOut = interpolate(frame, [200, 240], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const fadeOut = interpolate(
+    frame,
+    [durationInFrames - 18, durationInFrames - 1],
+    [1, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+  );
 
   return (
     <AbsoluteFill
