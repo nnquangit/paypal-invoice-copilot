@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pp-blue: #003087;
+  --pp-blue-bright: #009cde;
+  --pp-navy: #001c64;
+  --pp-sand: #f5f7fb;
+  --pp-ink: #0a2540;
+  --pp-muted: #5b6b7c;
+  --pp-success: #0a7c4c;
+  --pp-warn: #b45309;
+  --pp-danger: #b42318;
+  --pp-card: #ffffff;
+  --pp-border: #e4e9f2;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  color: var(--pp-ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #d9ecff 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, #e8f7ff 0%, transparent 50%),
+    var(--pp-sand);
+  font-family:
+    "Segoe UI",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5d0de;
+  border-radius: 999px;
+}
+
+.prose-chat p {
+  margin: 0.35rem 0;
+}
+.prose-chat ul {
+  margin: 0.35rem 0;
+  padding-left: 1.1rem;
+}
+.prose-chat code {
+  background: #eef3fb;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  font-size: 0.85em;
+}
+.prose-chat strong {
+  color: var(--pp-navy);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.28s ease-out;
+}
