@@ -113,8 +113,8 @@
             {
               "level": "task",
               "name": "Commit and push main",
-              "status": "doing",
-              "note": "docs + Remotion + workmap"
+              "status": "done",
+              "note": "abcceb9 → origin/main"
             }
           ]
         }
