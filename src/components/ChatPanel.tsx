@@ -12,7 +12,7 @@ type UiMessage = {
 };
 
 const SUGGESTIONS = [
-  "Invoice Acme Corp $500 for logo design, due in 14 days, remind them in 3 days if unpaid",
+  "Invoice Acme Sandbox LLC at buyer-sandbox@example.com $500 for logo design, due in 14 days",
   "Who owes me money?",
   "List my unpaid invoices",
   "Remind Acme about their invoice",
@@ -136,7 +136,9 @@ export function ChatPanel({
               ? `Cancelled **${data.invoice?.invoice_number}**.`
               : data.status === "executed_live"
                 ? `Executed on live PayPal sandbox: \`${data.tool}\`.`
-                : JSON.stringify(data, null, 2)
+                : data.fell_back_from_live && data.invoice
+                  ? `Sent **${data.invoice?.invoice_number}** (local desk; PayPal Invoicing not authorized on this app yet).\nLink: ${data.invoice?.href || "n/a"}`
+                  : JSON.stringify(data, null, 2)
         : "Okay — I cancelled that action. Nothing was sent.";
 
       setMessages((m) => [

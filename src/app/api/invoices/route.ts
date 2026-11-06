@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isPayPalConfigured } from "@/lib/config";
 import * as mock from "@/lib/mock-store";
+import { normalizeInvoiceList } from "@/lib/paypal-tools";
 
 export const runtime = "nodejs";
 
@@ -10,7 +11,6 @@ export async function GET(req: Request) {
   const page = Number(searchParams.get("page") || 1);
   const page_size = Number(searchParams.get("page_size") || 50);
 
-  // Live list via toolkit when configured; otherwise mock store (also used as cache UI).
   if (isPayPalConfigured()) {
     try {
       const { PayPalAgentToolkit } = await import("@paypal/agent-toolkit/ai-sdk");
@@ -33,7 +33,18 @@ export async function GET(req: Request) {
           { page, page_size, total_required: true },
           { toolCallId: "api-list", messages: [] }
         );
-        return NextResponse.json({ source: "paypal", result, status });
+        const normalized = normalizeInvoiceList({ source: "paypal", result });
+        return NextResponse.json({
+          source: normalized.source,
+          total: normalized.items.length,
+          items: normalized.items,
+          summary: normalized.summary,
+          status,
+          raw_error:
+            normalized.source.startsWith("mock") && typeof result === "string"
+              ? result.slice(0, 300)
+              : undefined,
+        });
       }
     } catch (err) {
       console.error("live list failed, using mock", err);

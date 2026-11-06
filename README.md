@@ -148,5 +148,7 @@ python3 -m http.server 4590
 # open http://127.0.0.1:4590/docs/
 ```
 
-Explainer video (Remotion, excluded from the Next.js build): see [`video/`](video/). Rendered MP4 lives outside the app build at `/workspace/out/invoice-copilot-explainer.mp4` when produced on the agent box.
+Explainer + Devpost demo videos: [`video/`](video/) (Remotion) and [`docs/media/`](docs/media/) (`invoice-copilot-explainer.mp4`, `devpost-demo.mp4`).
+
+Default Groq model: `openai/gpt-oss-20b` (tool-calling). Enable **Invoicing** on your PayPal sandbox REST app (Developer Dashboard → Features) for live PayPal invoice IDs — OAuth alone is not enough.
 

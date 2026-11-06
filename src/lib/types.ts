@@ -52,6 +52,10 @@ export interface AppMode {
   llmConfigured: boolean;
   paypalEnvironment: "sandbox" | "live" | "mock";
   llmProvider: string;
+  /** False when OAuth works but Invoicing feature/scope is missing on the REST app. */
+  paypalInvoicingOk?: boolean;
+  paypalInvoicingMessage?: string;
+  llmModel?: string;
 }
 
 export interface ChatMessage {

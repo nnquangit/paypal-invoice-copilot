@@ -97,6 +97,13 @@
               "status": "done",
               "at": "2026-11-05",
               "note": "en-US-AndrewNeural; 65s AAC; bg ffmpeg pad"
+            },
+            {
+              "level": "task",
+              "name": "Live sandbox E2E + Devpost demo",
+              "status": "done",
+              "at": "2026-11-06",
+              "note": "LLM live; PayPal invoicing feature missing; demo ~116s"
             }
           ]
         }

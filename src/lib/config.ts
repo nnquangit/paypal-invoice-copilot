@@ -42,3 +42,7 @@ export const MERCHANT = {
   given_name: process.env.MERCHANT_GIVEN_NAME || "Quang",
   surname: process.env.MERCHANT_SURNAME || "Ngo",
 };
+
+export function getLlmModel(): string {
+  return process.env.LLM_MODEL || "llama-3.3-70b-versatile";
+}
