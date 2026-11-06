@@ -9,3 +9,5 @@ Voice: `en-US-AndrewNeural` (edge-tts)
 5. The invoice desk lists live sandbox invoices — agentic commerce, end to end.
 
 Verified live IDs (sandbox): e.g. INV2-7GHU-A99B-PEXK-LWS4 (#0004) SENT; INV2-ASNX-PCBH-BZPC-S3H6 (#0005) created during recording.
+
+Burned-in captions: OFF (voiceover + bg music only; no hardsubs).

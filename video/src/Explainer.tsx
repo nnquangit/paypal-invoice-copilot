@@ -12,8 +12,6 @@ import { SolutionScene } from "./scenes/Solution";
 import { FlowScene } from "./scenes/Flow";
 import { StackScene } from "./scenes/Stack";
 import { OutroScene } from "./scenes/Outro";
-import { CaptionsOverlay } from "./CaptionsOverlay";
-import { sceneCaptions } from "./captions-data";
 import { colors } from "./theme";
 import {
   BG_MUSIC,
@@ -46,7 +44,6 @@ export const Explainer: React.FC = () => {
       <Series>
         {SCENES.map((scene, i) => {
           const Comp = SCENE_COMPONENTS[i];
-          const caps = sceneCaptions[scene.captionKey];
           return (
             <Series.Sequence
               key={scene.id}
@@ -61,7 +58,6 @@ export const Explainer: React.FC = () => {
                   name={`VO ${scene.id}`}
                 />
               </Sequence>
-              <CaptionsOverlay captions={caps} leadFrames={VO_LEAD_FRAMES} />
             </Series.Sequence>
           );
         })}

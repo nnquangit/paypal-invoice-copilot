@@ -52,3 +52,5 @@ Try demo mode in under a minute — no PayPal keys required. Open the chat and a
 | **Total** | ~50.2s VO | **65.0s** (1950f) |
 
 VO lead-in: 0.6s per scene. BG: `bg-ambient.mp3` at volume 0.45 (~−20 dB vs VO).
+
+Burned-in captions: OFF (voiceover + bg music only; no hardsubs).
