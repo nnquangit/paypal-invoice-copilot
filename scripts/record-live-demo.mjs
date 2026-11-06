@@ -3,6 +3,7 @@ import fs from 'fs';
 
 const outDir = '/workspace/out/recordings';
 fs.mkdirSync(outDir, { recursive: true });
+for (const f of fs.readdirSync(outDir)) fs.unlinkSync(`${outDir}/${f}`);
 
 const browser = await chromium.launch({
   headless: true,
@@ -15,39 +16,39 @@ const context = await browser.newContext({
 const page = await context.newPage();
 const sleep = (ms) => page.waitForTimeout(ms);
 
-await page.goto('http://127.0.0.1:3000/', { waitUntil: 'networkidle', timeout: 60000 });
-await page.getByPlaceholder(/Invoice Northwind/i).waitFor({ timeout: 30000 });
+async function setReactInput(locator, value) {
+  await locator.click();
+  await locator.evaluate((el, v) => {
+    const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+    desc.set.call(el, v);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, value);
+}
+
+await page.goto('http://localhost:3000/', { waitUntil: 'networkidle', timeout: 60000 });
+await page.getByText('Live LLM').waitFor({ timeout: 30000 });
 await sleep(2500);
 
-// Prefer typing (clearer than chip) — no secrets on screen
-const input = page.getByPlaceholder(/Invoice Northwind/i);
-await input.click();
-await sleep(500);
-const prompt =
-  'Invoice Acme Sandbox LLC at buyer-sandbox@example.com $500 for logo design, due in 14 days';
-await input.fill(prompt);
-await sleep(1500);
-await page.getByRole('button', { name: /^Send$/ }).click();
-
-// Wait for human confirmation card
+await page.locator('button', { hasText: 'Invoice Acme Sandbox' }).first().click();
 await page.getByText(/Human confirmation required/i).waitFor({ timeout: 120000 });
-await sleep(2500);
+await sleep(3000);
 await page.getByRole('button', { name: /^Confirm$/ }).click();
 
-await page.getByText(/Sent|local desk|INV-/i).first().waitFor({ timeout: 60000 });
-await sleep(2500);
+await page.getByText(/on PayPal sandbox/i).first().waitFor({ timeout: 90000 });
+await sleep(3000);
 
 await page.getByRole('button', { name: /Refresh/i }).click();
-await sleep(2500);
+await sleep(3000);
 
-await input.click();
-await input.fill('List my unpaid invoices');
-await sleep(800);
+const input = page.getByPlaceholder(/Invoice Northwind/i);
+await setReactInput(input, 'List my invoices and show their PayPal status');
+await sleep(400);
 await page.getByRole('button', { name: /^Send$/ }).click();
-await sleep(10000);
+await sleep(12000);
 
-await page.mouse.wheel(0, 300);
-await sleep(2000);
+await page.mouse.wheel(0, 350);
+await sleep(2500);
 
 const video = page.video();
 await context.close();

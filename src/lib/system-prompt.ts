@@ -26,7 +26,7 @@ Capabilities (via tools):
 
 When calling create_invoice with the PayPal Agent Toolkit schema, prefer:
 - currency_code (e.g. "USD")
-- invoicer_business_name / invoicer_email_address from merchant context
+- invoicer_business_name from merchant context (do not invent an invoicer email)
 - primary_recipients: [{ billing_info: { email_address, business_name } }]
 - items: [{ name, quantity: "1", unit_amount: { currency_code, value: "500.00" } }]
 - note / detail fields when useful

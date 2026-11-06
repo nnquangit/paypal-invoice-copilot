@@ -25,6 +25,19 @@ function parseToolkitPayload(result: unknown): any {
   return result;
 }
 
+function extractPayPalInvoiceId(payload: any): string | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  if (payload.id) return String(payload.id);
+  if (payload.invoice?.id) return String(payload.invoice.id);
+  const href = payload.href || payload.links?.[0]?.href || "";
+  const m = String(href).match(/invoices\/([^/?#]+)/);
+  return m?.[1];
+}
+
+function isPayPalError(payload: any): boolean {
+  return Boolean(payload && typeof payload === "object" && payload.ok === false);
+}
+
 function isAuthFailure(payload: any): boolean {
   if (!payload || typeof payload !== "object") return false;
   const msg = String(payload.message || payload.error || payload.name || "");
@@ -305,10 +318,17 @@ export async function executePendingAction(pending_action_id: string) {
   if (!action) return { error: "Pending action not found or already handled." };
 
   const live = await getLiveToolkitTools();
-  if (live && live[action.tool]) {
+  const probe = await probePayPalInvoicing();
+  // Local demo-store invoices must never hit PayPal (tests + offline desk).
+  const isDemoInvoice = String(action.invoice_id).startsWith("INV2-DEMO");
+  if (live && live[action.tool] && probe.ok && !isDemoInvoice) {
     try {
+      const execArgs =
+        action.tool === "send_invoice"
+          ? { invoice_id: action.invoice_id, send_to_recipient: true, ...action.args }
+          : { invoice_id: action.invoice_id, ...action.args };
       const result = await live[action.tool].execute?.(
-        { invoice_id: action.invoice_id, ...action.args },
+        execArgs,
         { toolCallId: pending_action_id, messages: [] }
       );
       const payload = parseToolkitPayload(result);
@@ -321,17 +341,66 @@ export async function executePendingAction(pending_action_id: string) {
             "PayPal Invoicing not authorized on this app (enable Invoicing in Developer Dashboard → Features).",
         };
       }
-      // Mirror status into mock desk when possible
-      if (action.tool === "send_invoice" && mock.getInvoice(action.invoice_id)) {
-        mock.sendInvoice(action.invoice_id);
+      if (isPayPalError(payload)) {
+        return {
+          status: "live_error",
+          tool: action.tool,
+          error: String(payload.message || payload.code || "PayPal API error"),
+          result: payload,
+        };
       }
-      return { status: "executed_live", tool: action.tool, result: payload ?? result };
-    } catch (err) {
-      const mockResult = await executeMockAction(action);
+
+      let href =
+        payload?.href ||
+        payload?.links?.find?.((l: any) => l.rel === "payer-view")?.href ||
+        undefined;
+
+      // Refresh invoice from PayPal for authoritative status
+      let liveInvoice: any = null;
+      if (live.get_invoice?.execute) {
+        try {
+          const raw = await live.get_invoice.execute(
+            { invoice_id: action.invoice_id },
+            { toolCallId: `${pending_action_id}-get`, messages: [] }
+          );
+          liveInvoice = parseToolkitPayload(raw);
+          href =
+            href ||
+            liveInvoice?.detail?.metadata?.recipient_view_url ||
+            liveInvoice?.links?.find?.((l: any) => /payer|recipient/i.test(l.rel || ""))?.href;
+        } catch {
+          /* ignore */
+        }
+      }
+
+      const status = String(liveInvoice?.status || (action.tool === "send_invoice" ? "SENT" : "")).toUpperCase();
+      if (action.tool === "send_invoice") {
+        mock.markInvoiceStatus(action.invoice_id, (status as any) || "SENT", href);
+      }
+      const desk = mock.getInvoice(action.invoice_id);
       return {
-        ...mockResult,
-        fell_back_from_live: true,
-        live_error: err instanceof Error ? err.message : String(err),
+        status: action.tool === "send_invoice" ? "sent" : "executed_live",
+        tool: action.tool,
+        paypal_live: true,
+        invoice: desk || undefined,
+        paypal_status: status || undefined,
+        href,
+        result: payload ?? result,
+      };
+    } catch (err) {
+      // Only fall back to mock when live toolkit throws unexpectedly AND invoice is local-demo.
+      if (String(action.invoice_id).startsWith("INV2-DEMO")) {
+        const mockResult = await executeMockAction(action);
+        return {
+          ...mockResult,
+          fell_back_from_live: true,
+          live_error: err instanceof Error ? err.message : String(err),
+        };
+      }
+      return {
+        status: "live_error",
+        tool: action.tool,
+        error: err instanceof Error ? err.message : String(err),
       };
     }
   }
@@ -501,12 +570,11 @@ export async function getInvoiceTools(): Promise<ToolMap> {
     description: mockTools.create_invoice.description,
     parameters: mockTools.create_invoice.parameters,
     execute: async (args: any, opts: any) => {
-      const liveArgs = {
+      // Do NOT set invoicer_email_address unless it is the sandbox merchant email —
+      // a mismatched email causes send to fail with "User is not associated with paypal".
+      const liveArgs: Record<string, unknown> = {
         currency_code: args.currency_code || "USD",
         invoicer_business_name: process.env.MERCHANT_BUSINESS_NAME || "Quang Studio",
-        invoicer_email_address: process.env.MERCHANT_EMAIL || "billing@quang.studio",
-        invoicer_given_name: process.env.MERCHANT_GIVEN_NAME || "Quang",
-        invoicer_surname: process.env.MERCHANT_SURNAME || "Ngo",
         note: args.note,
         primary_recipients: [
           {
@@ -529,23 +597,71 @@ export async function getInvoiceTools(): Promise<ToolMap> {
           },
         })),
       };
+      if (process.env.MERCHANT_EMAIL_USE_ON_INVOICE === "true" && process.env.MERCHANT_EMAIL) {
+        liveArgs.invoicer_email_address = process.env.MERCHANT_EMAIL;
+      }
       try {
         const raw = await live.create_invoice.execute(liveArgs, opts);
         const payload = parseToolkitPayload(raw);
-        if (isAuthFailure(payload)) {
+        if (isAuthFailure(payload) || isPayPalError(payload)) {
           return mockTools.create_invoice.execute(args, opts);
         }
-        const liveId = payload?.id || payload?.invoice?.id;
-        // Also keep a local desk copy keyed for confirm/send UX
-        const local = await mockTools.create_invoice.execute(args, opts);
+        let liveId = extractPayPalInvoiceId(payload);
+        let details: any = null;
+        if (liveId && live.get_invoice?.execute) {
+          try {
+            const got = await live.get_invoice.execute(
+              { invoice_id: liveId },
+              { toolCallId: "post-create-get", messages: [] }
+            );
+            details = parseToolkitPayload(got);
+            liveId = details?.id || liveId;
+          } catch {
+            /* ignore */
+          }
+        }
+        if (!liveId) {
+          return mockTools.create_invoice.execute(args, opts);
+        }
+
+        const currency = args.currency_code || "USD";
+        const amountValue = Number((args.items || [])[0]?.unit_price || 0).toFixed(2);
+        const now = new Date();
+        const due = new Date(now);
+        due.setDate(due.getDate() + (args.due_days ?? 14));
+        const desk = mock.upsertLiveInvoice({
+          id: liveId,
+          invoice_number:
+            details?.detail?.invoice_number || liveId.replace(/^INV2-/, "PP-"),
+          status: "DRAFT",
+          currency_code: currency,
+          recipient_email: args.recipient_email,
+          recipient_name: args.recipient_name,
+          recipient_business: args.recipient_business,
+          note: args.note,
+          due_date: due.toISOString().slice(0, 10),
+          invoice_date: now.toISOString().slice(0, 10),
+          items: (args.items || []).map((it: any) => ({
+            name: it.name,
+            description: it.description,
+            quantity: String(it.quantity ?? 1),
+            unit_amount: { currency_code: currency, value: Number(it.unit_price).toFixed(2) },
+          })),
+          amount: { currency_code: currency, value: amountValue },
+          href: `https://www.sandbox.paypal.com/invoice/p/#${liveId}`,
+          reminder_count: 0,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        });
+
         return {
           status: "draft_created_live",
+          paypal_live: true,
           paypal_invoice_id: liveId,
-          invoice: local.invoice,
-          result: payload,
-          formatted: local.formatted,
+          invoice: desk,
+          formatted: formatInvoice(desk),
           next_step:
-            "Invoice is a DRAFT on PayPal. Ask the user to confirm before calling send_invoice (use the local invoice.id).",
+            "Invoice is a DRAFT on PayPal sandbox. Ask the user to confirm, then call send_invoice with this invoice.id.",
         };
       } catch {
         return mockTools.create_invoice.execute(args, opts);
@@ -654,13 +770,6 @@ export function normalizeInvoiceList(payload: any): {
       } as Invoice;
     }
   );
-  if (!items.length) {
-    const local = mock.listInvoices({});
-    return {
-      items: local.items,
-      summary: mock.summarizeOutstanding(),
-      source: "mock-empty-live",
-    };
-  }
+  // Empty PayPal list is valid — do not mix in seeded mock/demo invoices.
   return { items, summary: null, source: "paypal" };
 }

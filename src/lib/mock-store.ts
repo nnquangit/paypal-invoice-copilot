@@ -166,6 +166,22 @@ export function createInvoice(input: {
   return inv;
 }
 
+
+export function upsertLiveInvoice(inv: Invoice): Invoice {
+  store().set(inv.id, inv);
+  return inv;
+}
+
+export function markInvoiceStatus(invoice_id: string, status: Invoice["status"], href?: string): Invoice | undefined {
+  const inv = store().get(invoice_id);
+  if (!inv) return undefined;
+  inv.status = status;
+  if (href) inv.href = href;
+  inv.updated_at = new Date().toISOString();
+  store().set(invoice_id, inv);
+  return inv;
+}
+
 export function sendInvoice(invoice_id: string): Invoice {
   const inv = mustGet(invoice_id);
   if (inv.status !== "DRAFT" && inv.status !== "SCHEDULED") {

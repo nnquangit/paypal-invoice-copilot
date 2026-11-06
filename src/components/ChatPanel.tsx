@@ -129,16 +129,26 @@ export function ChatPanel({
       const data = await res.json();
       const text = confirmed
         ? data.status === "sent"
-          ? `Sent **${data.invoice?.invoice_number}** to ${data.invoice?.recipient_email}.\nLink: ${data.invoice?.href || "PayPal invoice"}`
+          ? `Sent **${data.invoice?.invoice_number || data.paypal_status || "invoice"}**${
+              data.invoice?.recipient_email ? ` to ${data.invoice.recipient_email}` : ""
+            } on PayPal sandbox.\nID: \`${data.invoice?.id || ""}\`\nLink: ${
+              data.href || data.invoice?.href || "PayPal invoice"
+            }`
           : data.status === "reminded"
             ? `Reminder sent for **${data.invoice?.invoice_number}** (reminders: ${data.invoice?.reminder_count}).`
             : data.status === "cancelled"
               ? `Cancelled **${data.invoice?.invoice_number}**.`
               : data.status === "executed_live"
-                ? `Executed on live PayPal sandbox: \`${data.tool}\`.`
-                : data.fell_back_from_live && data.invoice
-                  ? `Sent **${data.invoice?.invoice_number}** (local desk; PayPal Invoicing not authorized on this app yet).\nLink: ${data.invoice?.href || "n/a"}`
-                  : JSON.stringify(data, null, 2)
+                ? `Executed on live PayPal sandbox: \`${data.tool}\`${
+                    data.href ? `\nLink: ${data.href}` : ""
+                  }`
+                : data.status === "live_error"
+                  ? `PayPal live error: ${data.error || "unknown"}`
+                  : data.fell_back_from_live && data.invoice
+                    ? `Sent **${data.invoice?.invoice_number}** (local desk fallback).\nLink: ${
+                        data.invoice?.href || "n/a"
+                      }`
+                    : JSON.stringify(data, null, 2)
         : "Okay — I cancelled that action. Nothing was sent.";
 
       setMessages((m) => [
