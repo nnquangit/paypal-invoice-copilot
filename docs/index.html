@@ -1,52 +1,125 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PayPal Invoice Copilot docs</title>
-<meta name="description" content="Reader docs for PayPal Invoice Copilot: architecture, how it works, setup, and diagrams.">
-<link rel="stylesheet" href="assets/docs.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Overview · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="PayPal Invoice Copilot: chat-based invoicing agent for freelancers. What it is, what is real vs mocked, architecture and how to run it.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
-    <div class="eyebrow">PayPal AI Hackathon · reader docs</div>
-    <h1>PayPal Invoice Copilot</h1>
-    <p class="lead">Chat-based AI agent that creates, sends, reminds, cancels, and tracks <b>PayPal invoices</b> for freelancers. Natural language in → draft invoice → <b>human confirmation</b> → PayPal Invoicing API (sandbox or mock) → live invoice desk with QR / payment links.</p>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html" aria-current="page">Overview</a>
+    <a class="wd-link" href="setup.html">Setup</a>
+    <a class="wd-link" href="how-it-works.html">How it works</a>
+    <a class="wd-link" href="security.html">Security</a>
+    <a class="wd-link" href="api.html">API</a>
+    <a class="wd-link" href="demo.html">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
+    <h1>Overview</h1>
+    <p class="wd-lead">A chat agent that drafts PayPal invoices from plain English and asks a person before it sends, reminds or cancels. Built for the PayPal AI Hackathon.</p>
   </header>
 
-  <section class="card" aria-labelledby="h-arch">
-    <h2 id="h-arch">Architecture</h2>
-    <p class="sub">Interactive diagram from the real Next.js call sites. Hover nodes to highlight routes; use Live for the trace animation.</p>
-    <div class="frame"><iframe src="diagrams/architecture.html" title="Architecture diagram" loading="lazy"></iframe></div>
-    <div class="frame-note"><a href="diagrams/architecture.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  <!-- workdocs:begin id=what -->
+  <section id="what">
+    <h2>What it is</h2>
+    <p><strong>Problem.</strong> Freelancers and small businesses turn chat notes like "bill Acme $500 for the logo, due in two weeks" into invoices by hand, in the PayPal web UI.</p>
+    <p><strong>Who it is for.</strong> A solo freelancer or small studio that bills clients through PayPal.</p>
+    <p><strong>What it does.</strong> You type a billing request. The agent creates a <em>draft</em> invoice, shows a confirmation card for send / remind / cancel, keeps an invoice desk (unpaid, collected, drafts) up to date, and can summarise who owes what. It runs with no keys at all (built-in demo agent and in-memory mock store), or with an OpenAI-compatible LLM plus the official <code>@paypal/agent-toolkit</code> against the PayPal sandbox.</p>
+    <figure>
+      <img src="media/gallery/02-confirm-before-send.jpg" width="1920" height="1080" loading="lazy" style="display:block;width:100%;height:auto;border-radius:8px" alt="Invoice Copilot: chat on the left with a 'Human confirmation required' card for sending invoice #0006; the invoice desk with sandbox invoices on the right.">
+      <figcaption>The confirmation card before a send, on a PayPal sandbox run (Devpost gallery image, <code>docs/media/gallery/</code>).</figcaption>
+    </figure>
+    <p>Submission links: <a href="https://github.com/nnquangit/paypal-invoice-copilot">source repository</a> · <a href="https://devpost.com/software/invoice-copilot">Devpost entry</a> · <a href="https://www.youtube.com/watch?v=UIxG2XZMInI">public demo video</a> (a local copy plays on the <a href="demo.html#goal">Demo script</a> page).</p>
+    <p><strong>Judge quick path</strong></p>
+    <ol>
+      <li><strong>Watch</strong> the published demo (about 1:53, a PayPal sandbox run with a live LLM; captions in <code>docs/media/devpost-demo.srt</code>).</li>
+      <li><strong>Run</strong> the zero-key walkthrough: <a href="#run">Quick start</a>, then the <a href="demo.html">Demo script</a>. Nothing reaches PayPal or an LLM.</li>
+      <li><strong>Inspect</strong> the real PayPal integration in <code>src/lib/paypal-tools.ts</code> (<code>getLiveToolkitTools</code>, <code>getInvoiceTools</code>, <code>executePendingAction</code>), explained on <a href="how-it-works.html#real-vs-mock">How it works → Real vs simulated</a>.</li>
+      <li><strong>Read the limits</strong> on <a href="security.html#gaps">Security → Known gaps</a>.</li>
+    </ol>
+    <p class="wd-source">Source: <code>README.md</code>, <code>package.json</code> (description), <code>src/components/AppShell.tsx</code>, <code>docs/media/devpost-demo.srt</code></p>
   </section>
+  <!-- workdocs:end id=what -->
 
-  <section class="card" aria-labelledby="h-life">
-    <h2 id="h-life">Invoice lifecycle</h2>
-    <p class="sub">DRAFT → SENT → PAID / CANCELLED, with confirmation-gated reminders.</p>
-    <div class="frame"><iframe src="diagrams/lifecycle-invoice.html" title="Invoice lifecycle" loading="lazy"></iframe></div>
-    <div class="frame-note"><a href="diagrams/lifecycle-invoice.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  <!-- workdocs:begin id=status -->
+  <section id="status">
+    <h2>Status: what is real and what is mocked</h2>
+    <p>Hackathon prototype, version <code>0.1.0</code>, <strong>sandbox-only</strong>. Which code runs depends on the environment (<code>src/lib/config.ts</code>):</p>
+    <div class="wd-table"><table>
+      <thead><tr><th>Part</th><th>No keys (default)</th><th>LLM key + PayPal sandbox keys, local launch</th></tr></thead>
+      <tbody>
+        <tr><td>Agent</td><td><span class="wd-tag mock">mock</span> Regex intent parser <code>runDemoAgent</code></td><td>OpenAI-compatible LLM via Vercel AI SDK <code>generateText</code> (max 6 tool steps); Groq <code>openai/gpt-oss-20b</code> by default</td></tr>
+        <tr><td>Create / list invoices</td><td><span class="wd-tag mock">mock</span> In-memory desk with 2 seeded invoices, every row labelled <code>local-mock</code></td><td>PayPal Agent Toolkit on the sandbox when the Invoicing probe passes. A PayPal error is reported as an error: no silent fallback to mock rows</td></tr>
+        <tr><td>Send / remind / cancel</td><td><span class="wd-tag mock">mock</span> Status change in memory after Confirm</td><td>Toolkit call after Confirm, chosen by the invoice's provenance (PayPal rows go to PayPal, local rows never do)</td></tr>
+        <tr><td>QR code</td><td colspan="2"><span class="wd-tag mock">mock</span> A graphic labelled <code>PLACEHOLDER</code> (<code>placeholder: true</code>); not a scannable code, in both modes</td></tr>
+        <tr><td>Storage</td><td colspan="2">Process memory only (<code>globalThis</code> maps); no database, lost on restart, not shared between instances</td></tr>
+        <tr><td>Hosting</td><td colspan="2">Live credentials are honoured only on a loopback bind (<code>scripts/serve.sh</code>) and are ignored on Vercel/Render, so a public deploy is always the zero-key demo</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Tests:</strong> <code>npm test</code> runs 4 files and 73 tests offline (stubbed PayPal toolkit and a fake LLM model; no network). On 2026-11-07: 73 passed, <code>tsc --noEmit</code> clean, <code>npm run build</code> succeeded.</p>
+    <p class="wd-note">Limits: no user accounts (a per-browser session cookie only proves which browser proposed an action); state is single-process memory; an action whose PayPal outcome is unknown must be checked in the PayPal sandbox dashboard by hand; summaries add amounts across currencies. Details on <a href="security.html#gaps">Security</a>.</p>
+    <p class="wd-source">Source: <code>src/lib/config.ts</code>, <code>src/lib/paypal-tools.ts</code> (<code>getInvoiceTools</code>, <code>executePendingAction</code>), <code>src/lib/mock-store.ts</code>, <code>src/lib/pending.ts</code>, <code>scripts/serve.sh</code>, <code>tests/*.test.ts</code></p>
   </section>
+  <!-- workdocs:end id=status -->
 
-  <section class="card" aria-labelledby="h-pages">
-    <h2 id="h-pages">Pages</h2>
-    <div class="grid" id="pages"></div>
+  <!-- workdocs:begin id=arch -->
+  <section id="arch">
+    <h2>Architecture</h2>
+    <p>One Next.js 15 app (App Router). The browser calls four API routes, and the routes call shared libraries in <code>src/lib/</code>. Every API request passes a guard (same-origin JSON; loopback only while live credentials are active). With no keys, every write lands in the in-memory store; the PayPal Agent Toolkit is used only when both PayPal keys are set, the server is bound to loopback and the Invoicing probe passes.</p>
+    <figure class="wd-embed">
+      <iframe src="diagrams/architecture.html" title="Interactive architecture diagram of Invoice Copilot" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
+      <figcaption>Interactive diagram (Archify): hover a box for its source lines, use PATH or LENS to trace a route. <a href="diagrams/architecture.html">Open it full screen</a>.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Browser UI</strong> (<code>ChatPanel</code>, <code>ConfirmCard</code>, desk) → <code>POST /api/chat</code>, <code>POST /api/confirm</code>; <code>AppShell</code> → <code>GET /api/invoices</code> and <code>GET /api/health</code>.</li>
+      <li><strong><code>/api/chat</code></strong> runs the regex <strong>demo agent</strong> when no LLM key is set (or <code>FORCE_DEMO_AGENT=true</code>), otherwise an <strong>OpenAI-compatible LLM</strong> with the <strong>invoice tools</strong>.</li>
+      <li><strong>Invoice tools</strong> are built per browser session and write to the <strong>in-memory store</strong> by default; with keys and a passing probe, create and list go to the <strong>PayPal Agent Toolkit</strong> → <strong>PayPal Invoicing v2</strong>, always in sandbox (any other <code>PAYPAL_ENVIRONMENT</code> disables PayPal).</li>
+      <li>Send, remind and cancel only record a pending action, owned by the session cookie, valid 15 minutes. No LLM tool can confirm. Only <strong><code>/api/confirm</code></strong> from the same browser runs it, once: PayPal for PayPal-sourced invoices, a status change in memory for local rows.</li>
+    </ul>
+    <p>More diagrams from the same sources: <a href="how-it-works.html#diagrams">sequence, workflow and invoice lifecycle</a>.</p>
+    <p class="wd-source">Source: <code>src/components/AppShell.tsx</code>, <code>src/components/ChatPanel.tsx</code>, <code>src/app/api/*/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/mock-store.ts</code>. Diagram source: <code>.archify/architecture-invoice-copilot-*/candidate.json</code> (regenerate with Archify <code>finalize</code>).</p>
   </section>
+  <!-- workdocs:end id=arch -->
 
-  <section class="card" aria-labelledby="h-run">
-    <h2 id="h-run">Quick start</h2>
-    <pre><code>npm install
-npm run dev
-# open http://localhost:3000 — works with zero credentials</code></pre>
-    <p class="sub">View these docs: run <code>python3 -m http.server 4590</code> at the repo root, then open <code>http://127.0.0.1:4590/docs/</code>. Also works on GitHub Pages from the <code>docs/</code> folder.</p>
+  <!-- workdocs:begin id=pages -->
+  <section id="pages">
+    <h2>Pages</h2>
+    <div class="wd-cards">
+      <a class="wd-card" href="setup.html"><strong>Setup</strong><p>Install, environment variables, run, test, verify and troubleshoot.</p></a>
+      <a class="wd-card" href="how-it-works.html"><strong>How it works</strong><p>One request from chat to confirmed send, with file and function names.</p></a>
+      <a class="wd-card" href="security.html"><strong>Security</strong><p>Trust boundaries, controls, secrets, and the open gaps.</p></a>
+      <a class="wd-card" href="api.html"><strong>API</strong><p>The four HTTP routes and the tools the agent can call.</p></a>
+      <a class="wd-card" href="demo.html"><strong>Demo script</strong><p>What to show, in what order, and what to say about the mocked parts.</p></a>
+      <a class="wd-card" href="workmap.html"><strong>Work map</strong><p>Epics → Features → Tasks → Subtasks with status and owner, kept by the agents.</p></a>
+    </div>
   </section>
-  <footer>Pages load live sources from the repo. Diagram candidates live under <code>.archify/</code> for regeneration.</footer>
-</div>
-<script type="module">
-import { renderNav, PAGES } from "./assets/docs.js";
-renderNav();
-document.getElementById("pages").innerHTML = PAGES.filter(([h]) => h !== "index.html")
-  .map(([href, label]) => `<a class="mini" href="${href}"><h3>${label}</h3><p>${href}</p></a>`).join("");
-</script>
+  <!-- workdocs:end id=pages -->
+
+  <!-- workdocs:begin id=run -->
+  <section id="run">
+    <h2>Quick start</h2>
+    <p>Zero-key demo from a fresh clone (commands from <code>README.md</code> and the <code>package.json</code> scripts):</p>
+    <pre><code>git clone https://github.com/nnquangit/paypal-invoice-copilot.git
+cd paypal-invoice-copilot
+npm install
+npm run dev        # open http://localhost:3000</code></pre>
+    <p>Type <code>Invoice Acme Corp $500 for logo design, due in 14 days</code>, press <strong>Confirm</strong> on the card, and watch the desk. Live PayPal sandbox and LLM settings, tests and troubleshooting are on <a href="setup.html">Setup</a>.</p>
+    <p class="wd-source">Source: <code>README.md</code> (Quick start), <code>package.json</code></p>
+  </section>
+  <!-- workdocs:end id=run -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh, 2026-11-07; sources: see the Source line under each section.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
 </body>
 </html>

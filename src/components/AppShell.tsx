@@ -16,17 +16,23 @@ export function AppShell() {
     draft_count: number;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [source, setSource] = useState<string | undefined>();
+  const [deskError, setDeskError] = useState<string | undefined>();
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const [health, inv] = await Promise.all([
         fetch("/api/health").then((r) => r.json()),
-        fetch("/api/invoices").then((r) => r.json()),
+        fetch("/api/invoices").then(async (r) => ({ ok: r.ok, status: r.status, body: await r.json().catch(() => ({})) })),
       ]);
       setMode(health.mode);
-      if (inv.items) setInvoices(inv.items);
-      if (inv.summary) setSummary(inv.summary);
+      setSource(inv.body.source);
+      setDeskError(inv.ok ? undefined : inv.body.error || `Invoice list failed (HTTP ${inv.status})`);
+      setInvoices(Array.isArray(inv.body.items) ? inv.body.items : []);
+      setSummary(inv.body.summary || null);
+    } catch (err) {
+      setDeskError(`Could not load invoices: ${err instanceof Error ? err.message : "network error"}`);
     } finally {
       setLoading(false);
     }
@@ -61,6 +67,8 @@ export function AppShell() {
           summary={summary}
           loading={loading}
           onRefresh={refresh}
+          source={source}
+          error={deskError}
         />
       </div>
 

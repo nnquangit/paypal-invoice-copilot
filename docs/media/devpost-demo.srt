@@ -1,0 +1,51 @@
+1
+00:00:00,600 --> 00:00:07,925
+Meet Invoice Copilot — a chat-based agent that turns a plain-English request into a real PayPal invoice.
+
+2
+00:00:09,600 --> 00:00:19,075
+Freelancers still lose hours digging through email for client details, rebuilding line items by hand, and chasing payment status across tools.
+
+3
+00:00:20,600 --> 00:00:29,150
+Invoice Copilot fixes that. Chat once, review a confirmation card, then create and send through PayPal — sandbox or live.
+
+4
+00:00:31,600 --> 00:00:41,250
+Here's the path: you describe the job, the agent drafts the invoice, you confirm, PayPal creates and sends it, and the desk shows the link and status.
+
+5
+00:00:43,600 --> 00:00:52,675
+It's built with Next.js, a demo agent or LLM plus the PayPal Agent Toolkit, and human confirmation before every write.
+
+6
+00:00:54,600 --> 00:01:01,300
+Try demo mode in under a minute — no PayPal keys required. Open the chat and ask for an invoice.
+
+7
+00:01:05,402 --> 00:01:11,527
+Here is Invoice Copilot on a real PayPal sandbox. Draft, human confirm, and send.
+
+8
+00:01:11,838 --> 00:01:17,863
+Now the live app. Groq handles tool calling, and PayPal sandbox invoicing is authorized.
+
+9
+00:01:17,838 --> 00:01:23,363
+I ask Invoice Copilot to bill Acme Sandbox five hundred dollars for logo design.
+
+10
+00:01:23,538 --> 00:01:29,038
+It creates a real PayPal draft, then asks for human confirmation before sending.
+
+11
+00:01:29,338 --> 00:01:35,013
+I confirm. PayPal marks the invoice as sent and returns a sandbox payment link.
+
+12
+00:01:35,838 --> 00:01:41,513
+The invoice desk lists live sandbox invoices. Agentic commerce, end to end.
+
+13
+00:01:44,400 --> 00:01:53,225
+Thanks for watching. Clone the repo, run npm install and npm run dev, then try it with your PayPal sandbox app and a Groq key.

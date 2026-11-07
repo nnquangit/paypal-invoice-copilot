@@ -1,6 +1,15 @@
 # Live app segment narration (Devpost demo)
 
-Voice: `en-US-AndrewNeural` (edge-tts)
+Voice: Kokoro-82M `af_heart` (Apache-2.0), files `public/audio/live/vo-live-07.mp3` … `vo-live-13.mp3` (caption cues 7-13 of `docs/media/devpost-demo.srt`).
+Mix: picture of the published cut unchanged; VO placed at each caption start, `bg-ambient.mp3` at volume 0.1 under the live segment (1 s fade-in, 1.5 s fade-out). The closing line starts at 1:44.4.
+
+Spoken in the video (captions 7-13):
+
+- Here is Invoice Copilot on a real PayPal sandbox. Draft, human confirm, and send.
+- (lines 1-5 below)
+- Thanks for watching. Clone the repo, run npm install and npm run dev, then try it with your PayPal sandbox app and a Groq key.
+
+Original plan:
 
 1. Now the live app — Groq for tool calling, PayPal sandbox invoicing authorized.
 2. I ask Invoice Copilot to bill Acme Sandbox five hundred dollars for logo design.

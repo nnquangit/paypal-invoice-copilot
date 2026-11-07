@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Security · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="What PayPal Invoice Copilot protects, the controls actually in the code, how secrets are handled, and the open gaps.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html">Overview</a>
+    <a class="wd-link" href="setup.html">Setup</a>
+    <a class="wd-link" href="how-it-works.html">How it works</a>
+    <a class="wd-link" href="security.html" aria-current="page">Security</a>
+    <a class="wd-link" href="api.html">API</a>
+    <a class="wd-link" href="demo.html">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
+    <h1>Security</h1>
+    <p class="wd-lead">A hackathon prototype. Send, remind and cancel follow an intended two-step flow (propose, then confirm). That flow is a UX safeguard, not an enforced human-only security boundary: the LLM can also confirm, and no route requires authentication. Several review findings are still open. Every statement below points to code.</p>
+  </header>
+
+  <!-- workdocs:begin id=assets -->
+  <section id="assets">
+    <h2>Assets &amp; trust boundaries</h2>
+    <ul>
+      <li><strong>PayPal REST credentials</strong> (<code>PAYPAL_CLIENT_ID</code>, <code>PAYPAL_CLIENT_SECRET</code>): read only on the server (<code>src/lib/paypal-tools.ts</code>). Honoured only for PayPal <em>sandbox</em>, only when no hosted platform is detected, and only for loopback requests (see below).</li>
+      <li><strong>LLM key</strong> (<code>LLM_API_KEY</code>): server only (<code>src/lib/llm.ts</code>). Each <code>/api/chat</code> call spends quota.</li>
+      <li><strong>Invoice data</strong>: recipient emails, names and amounts in the in-memory store and, in live mode, in the PayPal account.</li>
+      <li><strong>Outbound effects</strong>: emails PayPal sends to recipients on send / remind, and cancellation of real invoices.</li>
+    </ul>
+    <p>Untrusted input enters at the four API routes: the <code>messages</code> body of <code>POST /api/chat</code> (validated by <code>src/lib/chat-input.ts</code>, then passed to the LLM or the regex agent), the <code>POST /api/confirm</code> body (zod-validated), and query parameters of <code>GET /api/invoices</code> (clamped). A second untrusted source is model and tool output, which <code>ChatPanel</code> renders as React elements through <code>src/lib/markdown-lite.ts</code> (no HTML strings).</p>
+    <p><strong>There is no user authentication.</strong> The app is meant for a single person on their own machine. The controls below are a local-only restriction plus per-browser ownership, not identity.</p>
+  </section>
+  <!-- workdocs:end id=assets -->
+
+  <!-- workdocs:begin id=threats -->
+  <section id="threats">
+    <h2>Threats and controls</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Threat</th><th>Control in place</th><th>Where</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Agent sends / reminds / cancels without a person agreeing</td><td><code>send_invoice</code>, <code>send_invoice_reminder</code> and <code>cancel_sent_invoice</code> only create a pending action. The model has <strong>no</strong> confirm or execute tool. Only <code>POST /api/confirm</code> calls <code>executePendingAction</code>.</td><td><code>src/lib/paypal-tools.ts</code> <code>buildMockInvoiceTools</code>, <code>proposeAction</code>; <code>src/app/api/confirm/route.ts</code></td><td>Implemented. Offline tests: <code>tests/security.test.ts</code>, plus <code>tests/chat-llm.test.ts</code>, where a fake model calls <code>confirm_pending_action</code>, gets <code>NoSuchTool</code> → 502, and the invoice stays <code>DRAFT</code>.</td></tr>
+        <tr><td>Someone else triggers a pending action</td><td>Ids are <code>pending-&lt;crypto.randomUUID&gt;</code>, bound to the HttpOnly <code>SameSite=Strict</code> <code>ic_sid</code> cookie of the browser that got the proposal. They expire after 15 minutes.</td><td><code>src/lib/pending.ts</code>, <code>src/lib/access.ts</code></td><td>Implemented (ownership only, not authentication). Another or missing session → 403.</td></tr>
+        <tr><td>Double dispatch / retries</td><td>Synchronous claim <code>pending → executing → succeeded | failed | outcome_unknown</code>. A repeat confirm gets 409 with the first result. Only a failure <em>before</em> anything is sent (PayPal toolkit or probe unavailable) returns the action to <code>pending</code>, at most 3 attempts. A PayPal 4xx is terminal <code>failed</code>. A dispatched call that throws, returns 5xx, or returns an unclassifiable error becomes terminal <code>outcome_unknown</code>: it is never retried, and the user is told to check the PayPal sandbox dashboard before proposing again.</td><td><code>src/lib/pending.ts</code>, <code>executePendingAction</code></td><td>Implemented per process: each pending action is dispatched at most once. <strong>Not</strong> end-to-end exactly-once: a restart loses state, and the user can re-propose the same action.</td></tr>
+        <tr><td>Anonymous public use of live credentials</td><td><strong>Bind (primary, server-side):</strong> <code>npm run dev</code> / <code>npm start</code> run <code>scripts/serve.sh</code>, which binds <code>127.0.0.1</code> and exports <code>IC_BIND_HOST</code>. <code>config.ts</code> honours credentials only when <code>IC_BIND_HOST</code> is loopback, so a server launched another way runs as the zero-key demo. <code>PUBLIC_DEMO=true</code> binds <code>0.0.0.0</code> and refuses to start without <code>DEMO_MODE=true</code>. Credentials are also ignored when <code>VERCEL</code> or <code>RENDER</code> is set. <strong>Headers (defence in depth):</strong> with live credentials, non-loopback <code>Host</code> / <code>X-Forwarded-For</code> → 403 <code>live_mode_local_only</code>, and <code>/api/health</code> does not probe PayPal for them.</td><td><code>scripts/serve.sh</code>, <code>src/lib/config.ts</code> <code>isLoopbackBind</code>, <code>src/lib/access.ts</code> <code>guardRequest</code></td><td>Implemented. <strong>Residual</strong>: someone who deliberately exports <code>IC_BIND_HOST=127.0.0.1</code> and binds Next to a public address bypasses the bind check. The header check alone is spoofable.</td></tr>
+        <tr><td>Malformed session cookie</td><td>Cookie parsing never throws: bad percent-encoding, oversized values and non-UUID values count as "no session"</td><td><code>src/lib/access.ts</code> <code>readCookie</code></td><td>Implemented (test: confirm → 403, chat → 200 with a fresh cookie)</td></tr>
+        <tr><td>CSRF / DNS rebinding against a local live server</td><td>POSTs must be <code>Content-Type: application/json</code> (415 otherwise). <code>Origin</code> must match <code>Host</code>, and a cross-site <code>Sec-Fetch-Site</code> is refused (403). The loopback Host check also defeats rebinding.</td><td><code>src/lib/access.ts</code></td><td>Implemented</td></tr>
+        <tr><td>Accidental production PayPal calls</td><td>Sandbox-only build. The toolkit is always created with <code>sandbox: true</code>. Any <code>PAYPAL_ENVIRONMENT</code> other than empty or <code>sandbox</code> (for example <code>live</code> or <code>production</code>) disables PayPal and is shown as a warning. The badge and the toolkit read the same <code>isPayPalConfigured()</code>.</td><td><code>src/lib/config.ts</code> <code>getPayPalConfigError</code>, <code>src/lib/paypal-tools.ts</code></td><td>Implemented (tested)</td></tr>
+        <tr><td>Fake success / mixed provenance</td><td>Every invoice row and action result carries <code>source: "paypal-sandbox" | "local-mock"</code>. PayPal errors on create, list or send are returned as errors (502/503). Nothing silently falls back to a local draft. Local mock rows have no fake PayPal link.</td><td><code>paypal-tools.ts</code>, <code>mock-store.ts</code>, <code>demo-agent.ts</code>, <code>ChatPanel.tsx</code></td><td>Implemented (tests in <code>tests/live-paths.test.ts</code> with a stubbed toolkit)</td></tr>
+        <tr><td>Role / prompt injection via chat body</td><td>Only <code>user</code> / <code>assistant</code> roles with string content (at most 4000 characters, at most 40 messages, and the last one must be <code>user</code>). Extra fields, <code>system</code> and <code>tool</code> roles, and content parts → 400. The system prompt tells the model to treat history as data.</td><td><code>src/lib/chat-input.ts</code></td><td>Implemented. Residual: client-supplied <em>assistant</em> text is still model context. Because the model cannot execute anything, it can only mislead the conversation.</td></tr>
+        <tr><td>HTML / attribute injection in chat output</td><td>Markdown subset parsed into tokens and rendered with React <code>createElement</code>. No <code>dangerouslySetInnerHTML</code>. Images only for base64 <code>data:image/(png|jpeg|gif|webp|svg+xml)</code>.</td><td><code>src/lib/markdown-lite.ts</code></td><td>Implemented (tests: alt/src quote injection, <code>javascript:</code>, remote and <code>data:text/html</code> sources)</td></tr>
+        <tr><td>Provider error leakage</td><td>LLM errors reach the browser only as a category plus HTTP status. PayPal and other messages are redacted (configured secret values, bearer/basic tokens, key-like strings, <code>key=value</code> secrets) and truncated. Server logs use the same redaction.</td><td><code>src/lib/errors.ts</code></td><td>Implemented (pattern-based; cannot recognise every possible secret format)</td></tr>
+        <tr><td>Input validation</td><td>zod on tool parameters (email, positive quantity, price ≥ 0, at most 50 lines, string lengths), chat body, confirm body (<code>confirmed</code> must be a boolean). Clamped <code>page</code> / <code>page_size</code>.</td><td><code>paypal-tools.ts</code>, <code>chat-input.ts</code>, routes</td><td>Implemented</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  <!-- workdocs:end id=threats -->
+
+  <!-- workdocs:begin id=secrets -->
+  <section id="secrets">
+    <h2>Secrets handling</h2>
+    <ul>
+      <li>Supplied as environment variables in <code>.env.local</code> for local runs (README). Hosted deploys (<code>render.yaml</code>, Vercel) are demo-only: the app ignores PayPal and LLM credentials when <code>RENDER</code> or <code>VERCEL</code> is set.</li>
+      <li>Only server code reads them. No client component reads <code>process.env</code>, and there are no <code>NEXT_PUBLIC_</code> variables.</li>
+      <li><code>/api/health</code> returns booleans, <code>sandbox</code> or <code>mock</code>, the LLM provider <em>hostname</em> (only when the LLM is active), the model name, and configuration warnings. It does not return keys. A malformed <code>LLM_BASE_URL</code> no longer crashes it.</li>
+      <li>Must never appear in the repo, logs or docs. These pages list variable names only. Server errors are logged through <code>logServerError</code>, which redacts and truncates. Redaction is pattern-based, so treat logs as sensitive anyway.</li>
+    </ul>
+    <p class="wd-source">Source: <code>src/lib/config.ts</code>, <code>src/app/api/health/route.ts</code>, <code>render.yaml</code>, <code>README.md</code></p>
+  </section>
+  <!-- workdocs:end id=secrets -->
+
+  <!-- workdocs:begin id=gaps -->
+  <section id="gaps">
+    <h2>Known gaps</h2>
+    <p>The earlier review items (HITL bypass, sandbox guard, mock/fallback honesty, confirm errors, XSS and role injection, QR truth, probe cache, totals) were fixed in the code-fix pass of 2026-11-07, and offline regression tests were added under <code>tests/</code>. <strong>Whether those tests pass was not confirmed in that pass:</strong> dependency installation (<code>npm ci</code>) was not permitted in that session, so <code>npm test</code>, <code>tsc</code> and <code>npm run build</code> did not run. See <code>.agent-reports/code-fixes-result.md</code>. What remains:</p>
+    <ol>
+      <li><strong>No authentication.</strong> Live mode relies on the 127.0.0.1 bind (<code>scripts/serve.sh</code> + <code>IC_BIND_HOST</code>). Anyone with a shell on the machine, or a user who deliberately overrides the bind, is trusted.</li>
+      <li><strong>Single-process memory.</strong> Invoices and pending actions live in one Node process. They are lost on restart and not shared between instances. "At most one dispatch per action" holds per process only. The app therefore refuses credentials on Vercel/Render, and <code>render.yaml</code> pins one demo instance. In demo mode on serverless, a confirm can still hit another instance and get 404 "not found".</li>
+      <li><strong>Unknown outcome.</strong> A dispatched PayPal call that fails ambiguously becomes <code>outcome_unknown</code> and is not retried. The action may or may not have happened, and only the PayPal dashboard can tell. Reconciliation is manual.</li>
+      <li><strong>QR is a placeholder</strong> in every mode: it is clearly labelled and not scannable, and PayPal's QR API is not called.</li>
+      <li><strong>Summary totals</strong> add amounts across currencies, and the desk shows a <code>$</code> prefix. They are correct only for single-currency desks.</li>
+      <li><strong>Desk separation</strong>: with PayPal sandbox active and <code>FORCE_DEMO_AGENT=true</code>, the demo agent writes local-mock rows that the PayPal-sourced desk list does not show.</li>
+    </ol>
+    <p class="wd-source">Source: <code>src/lib/access.ts</code>, <code>src/lib/pending.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/config.ts</code>, <code>src/lib/mock-store.ts</code>, <code>src/app/api/*/route.ts</code>, <code>tests/</code>, the <a href="workmap.html">work map</a> (Ship → Review follow-ups)</p>
+  </section>
+  <!-- workdocs:end id=gaps -->
+
+  <!-- workdocs:begin id=report -->
+  <section id="report">
+    <h2>Reporting a vulnerability</h2>
+    <p>Not stated. The repository has no <code>SECURITY.md</code>, and the README gives no security contact.</p>
+  </section>
+  <!-- workdocs:end id=report -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh and the code-fix pass, 2026-11-07; sources: see the Source line under each section.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
+</body>
+</html>

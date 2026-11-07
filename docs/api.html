@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>API · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="HTTP routes and agent tools of PayPal Invoice Copilot, with request/response shapes and errors taken from the route code.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html">Overview</a>
+    <a class="wd-link" href="setup.html">Setup</a>
+    <a class="wd-link" href="how-it-works.html">How it works</a>
+    <a class="wd-link" href="security.html">Security</a>
+    <a class="wd-link" href="api.html" aria-current="page">API</a>
+    <a class="wd-link" href="demo.html">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
+    <h1>API</h1>
+    <p class="wd-lead">Four internal JSON routes used by the web UI, plus the tool set the agent can call. There is no published, versioned public API.</p>
+  </header>
+
+  <!-- workdocs:begin id=kind -->
+  <section id="kind">
+    <h2>Interface type</h2>
+    <p>HTTP JSON routes from the Next.js App Router (<code>src/app/api/*/route.ts</code>, Node.js runtime). They are internal to the app: there is no OpenAPI schema, no versioning, and <strong>no user authentication</strong>. POSTs must be same-origin <code>application/json</code>. While PayPal or LLM credentials are active, every route accepts loopback requests only (see <a href="security.html#threats">Security</a>). The second surface is the <strong>agent tool set</strong> the LLM can call, defined in <code>src/lib/paypal-tools.ts</code>.</p>
+  </section>
+  <!-- workdocs:end id=kind -->
+
+  <!-- workdocs:begin id=endpoints -->
+  <section id="endpoints">
+    <h2>Endpoints</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Method + path</th><th>Purpose</th><th>Auth</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST /api/chat</code></td><td>Run one agent turn (demo agent or LLM with tools). Sets the <code>ic_sid</code> session cookie.</td><td>none; loopback-only in live mode</td><td><code>src/app/api/chat/route.ts</code></td></tr>
+        <tr><td><code>POST /api/confirm</code></td><td>The <strong>only</strong> way to execute or discard a pending send / remind / cancel</td><td><code>ic_sid</code> cookie of the proposing browser; loopback-only in live mode</td><td><code>src/app/api/confirm/route.ts</code></td></tr>
+        <tr><td><code>GET /api/invoices</code></td><td>Desk list and summary: PayPal sandbox list when PayPal is active, else the local mock desk</td><td>none; loopback-only in live mode</td><td><code>src/app/api/invoices/route.ts</code></td></tr>
+        <tr><td><code>GET /api/health</code></td><td>Mode, configuration warnings, invoicing probe result (cached; skipped for remote callers in live mode), model name</td><td>none</td><td><code>src/app/api/health/route.ts</code></td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Agent tools</strong> (names exposed to the LLM, from <code>buildMockInvoiceTools</code>): <code>create_invoice</code>, <code>list_invoices</code>, <code>get_invoice</code>, <code>send_invoice</code>*, <code>send_invoice_reminder</code>*, <code>cancel_sent_invoice</code>*, <code>generate_invoice_qr_code</code> (placeholder image, not scannable), <code>summarize_outstanding</code>. * = only creates a pending action (<code>needs_confirmation</code>). There is no confirm or execute tool. With the PayPal sandbox active, <code>create_invoice</code> and <code>list_invoices</code> run on PayPal sandbox, and the send / remind / cancel tools execute on PayPal after a UI confirm.</p>
+  </section>
+  <!-- workdocs:end id=endpoints -->
+
+  <!-- workdocs:begin id=shapes -->
+  <section id="shapes">
+    <h2>Request &amp; response</h2>
+    <p>The shapes below are <strong>examples written by hand from the route code and types</strong>, not captured from a run. Ids and dates vary.</p>
+    <h3><code>POST /api/chat</code></h3>
+    <pre><code>// request
+{ "messages": [ { "role": "user", "content": "Invoice Acme Corp $500 for logo design, due in 14 days" } ] }
+
+// rules: roles "user" | "assistant" only, string content ≤ 4000 chars, ≤ 40 messages,
+// last message must be "user", no extra fields (system/tool roles → 400)
+
+// response, demo agent (Content-Type: application/json, X-Invoice-Copilot-Mode: demo-agent,
+// Set-Cookie: ic_sid=…; Path=/api; HttpOnly; SameSite=Strict on first call)
+{ "type": "demo", "source": "local-mock",
+  "text": "Draft created in the **local mock desk** (no PayPal call): …",
+  "pendingAction": { "id": "pending-&lt;uuid&gt;", "tool": "send_invoice", "invoice_id": "INV2-DEMO-…",
+                     "summary": "Mark INV-1011 (USD 500.00) as sent to … — local mock desk, no email sent",
+                     "args": {}, "created_at": "…" },
+  "mode": { "demoMode": true, "paypalConfigured": false, "llmConfigured": false,
+            "paypalEnvironment": "mock", "llmProvider": "demo-agent" } }
+
+// response, LLM path
+{ "type": "llm", "source": "paypal-sandbox" | "local-mock", "text": "…",
+  "toolCalls": [ … ], "toolResults": [ … ], "pendingAction": { … } | null, "mode": { … } }</code></pre>
+    <p>The streaming (<code>text/event-stream</code>) variant was removed. The bundled UI never used it.</p>
+    <h3><code>POST /api/confirm</code></h3>
+    <pre><code>// request
+{ "pending_action_id": "pending-…", "confirmed": true }
+
+// request header: Cookie: ic_sid=… (the session that received the proposal)
+
+// 200 responses
+{ "status": "sent" | "reminded" | "cancelled", "source": "local-mock", "invoice": { …Invoice } }
+{ "status": "sent" | "reminded" | "cancelled", "source": "paypal-sandbox", "paypal_live": true,
+  "tool": "…", "invoice": …, "paypal_status": "SENT", "href": "…" }
+{ "status": "cancelled_by_user" }                                   // confirmed: false
+
+// error responses
+{ "status": "error", "code": "…", "error": "…", "retryable"?: boolean, "previous_result"?: { … } }</code></pre>
+    <p>Lifecycle: <code>pending → executing → succeeded | failed | outcome_unknown</code>, or <code>cancelled</code>. Each action is dispatched to PayPal at most once per process and expires after 15 minutes. <code>retryable: true</code> appears only when nothing was sent (PayPal unavailable before dispatch; at most 3 attempts). An <code>outcome_unknown</code> error carries <code>reconcile: true</code>: check PayPal before proposing again.</p>
+    <h3><code>GET /api/invoices?status=&amp;page=&amp;page_size=</code></h3>
+    <pre><code>{ "source": "local-mock" | "paypal-sandbox", "total": 2, "items": [ …Invoice (each with "source") ],
+  "summary": { "unpaid_count": 1, "unpaid_total": "850.00", "paid_total": "1200.00",
+               "draft_count": 0, "currencies": ["USD"], "by_recipient": [ … ] } }</code></pre>
+    <p>The example values are the two seeded mock invoices (<code>mock-store.ts:seed</code>): <code>INV-1001</code> SENT USD 850.00 and <code>INV-1000</code> PAID USD 1200.00. <code>status</code> filters by exact status. <code>page</code> is clamped to 1–1000 and <code>page_size</code> to 1–100 (default 50). For PayPal rows the summary is computed from the returned page.</p>
+    <h3><code>GET /api/health</code></h3>
+    <pre><code>{ "ok": true, "app": "paypal-invoice-copilot",
+  "mode": { "demoMode": …, "paypalConfigured": …, "llmConfigured": …, "paypalEnvironment": "mock" | "sandbox",
+            "llmProvider": "&lt;hostname&gt;" | "demo-agent", "paypalConfigError"?: "…", "llmConfigError"?: "…",
+            "liveAccess": true | false, "paypalInvoicingOk": …, "paypalInvoicingMessage": "…", "llmModel"?: "…" },
+  "time": "…" }</code></pre>
+    <p class="wd-source">Source: <code>src/app/api/*/route.ts</code>, <code>src/lib/types.ts</code>, <code>src/lib/mock-store.ts</code>, <code>src/lib/paypal-tools.ts</code></p>
+  </section>
+  <!-- workdocs:end id=shapes -->
+
+  <!-- workdocs:begin id=errors -->
+  <section id="errors">
+    <h2>Errors</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Route</th><th>Status</th><th>Body</th></tr></thead>
+      <tbody>
+        <tr><td>all POST</td><td>415 / 403</td><td>Not <code>application/json</code> (<code>unsupported_media_type</code>) / cross-origin <code>Origin</code> or <code>Sec-Fetch-Site</code> (<code>cross_origin</code>)</td></tr>
+        <tr><td>all except health</td><td>403</td><td><code>live_mode_local_only</code>: live credentials are active and the request headers are not loopback. This is defence in depth; credentials are only active on a 127.0.0.1-bound server (<code>scripts/serve.sh</code>).</td></tr>
+        <tr><td><code>/api/chat</code></td><td>400</td><td>Invalid JSON or a body that breaks the message rules: <code>{type:"error", text}</code></td></tr>
+        <tr><td><code>/api/chat</code></td><td>502</td><td><code>{type:"error", text:"LLM error: &lt;category, HTTP status&gt;", mode}</code>. The provider's raw message is never returned.</td></tr>
+        <tr><td><code>/api/chat</code></td><td>500</td><td>Demo agent failure, nothing changed</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>400</td><td><code>bad_request</code>: invalid JSON, or <code>pending_action_id</code> / boolean <code>confirmed</code> missing</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>403</td><td><code>forbidden</code>: missing cookie or another browser session</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>404</td><td><code>not_found</code> (unknown, pruned, or lost on restart / other instance) or <code>invoice_not_found</code></td></tr>
+        <tr><td><code>/api/confirm</code></td><td>409</td><td><code>already_executed</code> (with <code>previous_result</code>), <code>in_progress</code>, <code>failed</code>, <code>outcome_unknown</code>, <code>cancelled</code>, <code>too_many_attempts</code>, <code>invalid_invoice_state</code> (for example sending a non-draft)</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>410</td><td><code>expired</code> (older than 15 minutes)</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>502</td><td><code>paypal_rejected</code> (PayPal 4xx) / <code>paypal_not_authorized</code>: definite, terminal. <code>outcome_unknown</code> (dispatched, then a network error, 5xx or unclassifiable error): terminal, not retried, <code>reconcile: true</code>.</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>503</td><td><code>paypal_unavailable</code>: nothing was sent, <code>retryable: true</code> while attempts remain. Nothing is ever faked locally.</td></tr>
+        <tr><td><code>/api/confirm</code></td><td>500</td><td><code>internal_error</code>, generic message</td></tr>
+        <tr><td><code>/api/invoices</code></td><td>502</td><td>PayPal sandbox list failed: <code>{source:"paypal-sandbox", error, items:[], summary:null}</code>. No mock rows are substituted.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  <!-- workdocs:end id=errors -->
+
+  <!-- workdocs:begin id=try -->
+  <section id="try">
+    <h2>Try it</h2>
+    <p>Against a local zero-key run (<code>npm run dev</code>; the README gives <code>http://localhost:3000</code>). No secrets are needed:</p>
+    <pre><code>curl -s http://localhost:3000/api/health
+
+# -c / -b keep the ic_sid session cookie: confirm must come from the same session
+curl -s -c /tmp/ic.jar -X POST http://localhost:3000/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"messages":[{"role":"user","content":"Invoice Acme Corp $500 for logo design, due in 14 days"}]}'
+
+# copy pendingAction.id from the reply, then:
+curl -s -b /tmp/ic.jar -X POST http://localhost:3000/api/confirm \
+  -H 'Content-Type: application/json' \
+  -d '{"pending_action_id":"&lt;PENDING_ACTION_ID&gt;","confirmed":true}'
+
+curl -s 'http://localhost:3000/api/invoices?status=SENT'</code></pre>
+    <p class="wd-note">These commands were not run while writing this page. In zero-key mode everything stays in server memory and nothing reaches PayPal.</p>
+  </section>
+  <!-- workdocs:end id=try -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh and the code-fix pass, 2026-11-07; sources: see the Source line under each section.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
+</body>
+</html>

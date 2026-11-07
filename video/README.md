@@ -1,7 +1,7 @@
 # Invoice Copilot explainer (Remotion)
 
 1920×1080 · 30 fps · ~65 s composition `InvoiceCopilotExplainer`  
-English VO: `en-US-AndrewNeural` (edge-tts) · ambient pad synthesized with ffmpeg  
+English VO: Kokoro-82M `af_heart` (Apache-2.0, `scripts/kokoro-vo.py`) · ambient pad synthesized with ffmpeg\
 Script: [`narration.md`](narration.md) · assets: `public/audio/`
 
 ```bash

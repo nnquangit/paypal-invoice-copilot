@@ -1,5 +1,8 @@
-import { streamText, generateText } from "ai";
+import { generateText } from "ai";
 import { getAppMode, isLlmConfigured } from "@/lib/config";
+import { ensureSession, guardRequest, withCookie } from "@/lib/access";
+import { parseChatBody } from "@/lib/chat-input";
+import { logServerError, publicLlmError } from "@/lib/errors";
 import { getInvoiceTools } from "@/lib/paypal-tools";
 import { runDemoAgent } from "@/lib/demo-agent";
 import { getModel } from "@/lib/llm";
@@ -8,60 +11,57 @@ import { buildSystemPrompt } from "@/lib/system-prompt";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+type PendingOut = {
+  id: string;
+  tool: string;
+  invoice_id: string;
+  summary: string;
+  args: Record<string, unknown>;
+  created_at: string;
+};
+
 export async function POST(req: Request) {
-  const body = await req.json();
-  const messages = (body.messages || []) as Array<{
-    role: "user" | "assistant" | "system";
-    content: string;
-  }>;
-  const lastUser = [...messages].reverse().find((m) => m.role === "user");
-  const mode = getAppMode();
+  const blocked = guardRequest(req, { mutation: true });
+  if (blocked) return blocked;
 
-  // Zero-credential demo path: deterministic agent, still streams-like JSON.
-  if (!isLlmConfigured() || process.env.FORCE_DEMO_AGENT === "true") {
-    const result = await runDemoAgent(lastUser?.content || "hello");
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      start(controller) {
-        const payload = {
-          type: "demo",
-          text: result.text,
-          pendingAction: result.pendingAction || null,
-          mode,
-        };
-        controller.enqueue(encoder.encode(JSON.stringify(payload)));
-        controller.close();
-      },
-    });
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "application/json",
-        "X-Invoice-Copilot-Mode": "demo-agent",
-      },
-    });
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return Response.json({ type: "error", text: "Request body must be valid JSON." }, { status: 400 });
   }
+  const parsed = parseChatBody(raw);
+  if (!parsed.ok) {
+    return Response.json({ type: "error", text: parsed.error }, { status: 400 });
+  }
+  const messages = parsed.messages;
+  const lastUser = messages[messages.length - 1];
+  const mode = getAppMode();
+  const session = ensureSession(req);
 
-  const tools = await getInvoiceTools();
-  const system = buildSystemPrompt(mode);
-
-  // Prefer streaming when the client asks for it via Accept header.
-  const wantsStream = (req.headers.get("accept") || "").includes("text/event-stream");
-
-  if (wantsStream) {
-    const result = streamText({
-      model: getModel(),
-      system,
-      messages,
-      tools,
-      maxSteps: 6,
-      temperature: 0.2,
-    });
-    return result.toDataStreamResponse({
-      headers: { "X-Invoice-Copilot-Mode": "llm-stream" },
-    });
+  // Zero-credential path: deterministic agent on the local mock desk.
+  if (!isLlmConfigured()) {
+    try {
+      const result = await runDemoAgent(lastUser.content || "hello", { owner: session.id });
+      return withCookie(
+        Response.json(
+          { type: "demo", source: "local-mock", text: result.text, pendingAction: result.pendingAction || null, mode },
+          { headers: { "X-Invoice-Copilot-Mode": "demo-agent" } }
+        ),
+        session.setCookie
+      );
+    } catch (err) {
+      logServerError("demo agent error:", err);
+      return withCookie(
+        Response.json({ type: "error", text: "The demo agent failed on this request; nothing was changed.", mode }, { status: 500 }),
+        session.setCookie
+      );
+    }
   }
 
   try {
+    const { tools, source } = await getInvoiceTools({ owner: session.id });
+    const system = buildSystemPrompt({ ...mode, toolSource: source });
     const result = await generateText({
       model: getModel(),
       system,
@@ -71,41 +71,33 @@ export async function POST(req: Request) {
       temperature: 0.2,
     });
 
-    // Flatten tool activity across maxSteps so the UI can surface Confirm cards.
-    const toolCalls = [
-      ...(result.toolCalls || []),
-      ...((result.steps || []).flatMap((s: { toolCalls?: unknown[] }) => s.toolCalls || [])),
-    ];
-    const toolResults = [
-      ...(result.toolResults || []),
-      ...((result.steps || []).flatMap((s: { toolResults?: unknown[] }) => s.toolResults || [])),
-    ];
-    let pendingAction = null as null | {
-      id: string;
-      tool: string;
-      invoice_id: string;
-      summary: string;
-      args: Record<string, unknown>;
-      created_at: string;
-    };
-    let draftInvoice: any = null;
-    for (const tr of toolResults as Array<{ result?: any; output?: any }>) {
-      const res = (tr as any)?.result ?? (tr as any)?.output ?? tr;
-      if (res?.invoice && (res.status === "draft_created" || res.status === "draft_created_live")) {
-        draftInvoice = res.invoice;
+    // result.toolCalls/toolResults are the last step only; steps[] holds every step.
+    const steps = (result.steps || []) as Array<{ toolCalls?: unknown[]; toolResults?: unknown[] }>;
+    const toolCalls = steps.length ? steps.flatMap((s) => s.toolCalls || []) : result.toolCalls || [];
+    const toolResults: unknown[] = steps.length
+      ? steps.flatMap((s) => s.toolResults || [])
+      : [...(result.toolResults || [])];
+
+    let pendingAction: PendingOut | null = null;
+    let draftInvoice: { id?: string } | null = null;
+    for (const tr of toolResults as Array<{ result?: Record<string, unknown> }>) {
+      const res = tr?.result;
+      if (!res) continue;
+      if (res.invoice && (res.status === "draft_created" || res.status === "draft_created_live")) {
+        draftInvoice = res.invoice as { id?: string };
       }
-      if (res?.status === "needs_confirmation" && res.pending_action_id) {
+      if (res.status === "needs_confirmation" && typeof res.pending_action_id === "string") {
         pendingAction = {
           id: res.pending_action_id,
-          tool: res.tool,
-          invoice_id: res.invoice_id,
-          summary: res.summary,
+          tool: String(res.tool),
+          invoice_id: String(res.invoice_id),
+          summary: String(res.summary),
           args: {},
           created_at: new Date().toISOString(),
         };
       }
     }
-    // Guarantee a Confirm card after draft when the model forgot send_invoice.
+    // Propose (never execute) a send when the model created a draft but forgot send_invoice.
     if (!pendingAction && draftInvoice?.id && tools.send_invoice?.execute) {
       const queued = await tools.send_invoice.execute(
         { invoice_id: draftInvoice.id },
@@ -124,24 +116,15 @@ export async function POST(req: Request) {
       }
     }
 
-    return Response.json({
-      type: "llm",
-      text: result.text,
-      toolCalls,
-      toolResults,
-      pendingAction,
-      mode,
-    });
+    return withCookie(
+      Response.json({ type: "llm", source, text: result.text, toolCalls, toolResults, pendingAction, mode }),
+      session.setCookie
+    );
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("chat LLM error:", message);
-    return Response.json(
-      {
-        type: "error",
-        text: `LLM error: ${message}`,
-        mode,
-      },
-      { status: 502 }
+    logServerError("chat LLM error:", err);
+    return withCookie(
+      Response.json({ type: "error", text: `LLM error: ${publicLlmError(err)}`, mode }, { status: 502 }),
+      session.setCookie
     );
   }
 }

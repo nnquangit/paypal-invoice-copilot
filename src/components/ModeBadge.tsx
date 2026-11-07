@@ -4,9 +4,10 @@ import type { AppMode } from "@/lib/types";
 
 export function ModeBadge({ mode }: { mode: AppMode | null }) {
   if (!mode) return null;
-  const liveLlm = mode.llmConfigured && !mode.demoMode;
-  const paypalOk = mode.paypalConfigured;
+  const liveLlm = mode.llmConfigured;
+  const sandbox = mode.paypalEnvironment === "sandbox";
   const invoicingOk = mode.paypalInvoicingOk === true;
+  const warning = mode.paypalConfigError || mode.llmConfigError || (mode.liveAccess === false ? "Live mode is local-only" : "");
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
       <span
@@ -22,12 +23,18 @@ export function ModeBadge({ mode }: { mode: AppMode | null }) {
         {liveLlm ? "Live LLM" : "Demo mode"}
       </span>
       <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-        PayPal: {mode.paypalEnvironment}
-        {paypalOk ? (invoicingOk ? " · invoicing OK" : " · OAuth OK, invoicing off") : ""}
+        {sandbox
+          ? `PayPal: sandbox${invoicingOk ? " · invoicing OK" : " · invoicing unavailable"}`
+          : "PayPal: local mock (no PayPal calls)"}
       </span>
       <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-        LLM: {mode.llmConfigured ? `${mode.llmProvider}${mode.llmModel ? ` · ${mode.llmModel}` : ""}` : "built-in demo agent"}
+        LLM: {liveLlm ? `${mode.llmProvider}${mode.llmModel ? ` · ${mode.llmModel}` : ""}` : "built-in demo agent"}
       </span>
+      {warning && (
+        <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-rose-800" title={warning}>
+          {warning.length > 70 ? `${warning.slice(0, 69)}…` : warning}
+        </span>
+      )}
     </div>
   );
 }

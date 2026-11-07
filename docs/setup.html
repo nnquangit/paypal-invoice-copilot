@@ -1,22 +1,157 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Setup — PayPal Invoice Copilot</title>
-<meta name="description" content="Setup for PayPal Invoice Copilot.">
-<link rel="stylesheet" href="assets/docs.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Setup · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="Install, configure, run, test and verify PayPal Invoice Copilot, from zero-key demo to live PayPal sandbox.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero"><div class="eyebrow">PayPal Invoice Copilot</div><h1>Setup</h1>
-    <p class="lead">Credentials checklist and demo quick start — rendered from docs/setup.md. Source: <code>docs/setup.md</code>.</p></header>
-  <section class="card" id="content" aria-live="polite"><p class="sub">Loading…</p></section>
-</div>
-<script type="module">
-import { renderNav, loadText, mdToHTML, fail } from "./assets/docs.js";
-renderNav();
-const el = document.getElementById("content");
-loadText("setup.md").then((md) => { el.innerHTML = mdToHTML(md); }).catch((e) => fail(el, e));
-</script>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html">Overview</a>
+    <a class="wd-link" href="setup.html" aria-current="page">Setup</a>
+    <a class="wd-link" href="how-it-works.html">How it works</a>
+    <a class="wd-link" href="security.html">Security</a>
+    <a class="wd-link" href="api.html">API</a>
+    <a class="wd-link" href="demo.html">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
+    <h1>Setup</h1>
+    <p class="wd-lead">From a fresh clone to a running app: the zero-key demo needs only Node.js; live mode adds PayPal sandbox and LLM credentials.</p>
+  </header>
+
+<!-- workdocs:begin id=prereq -->
+  <section id="prereq">
+    <h2>Prerequisites</h2>
+    <ul>
+      <li><strong>Node.js with npm.</strong> Version not pinned for local runs: <code>package.json</code> has no <code>engines</code> field. The only pin is <code>NODE_VERSION: "20"</code> in <code>render.yaml</code>, for the Render deploy. Node 20 is the safe choice.</li>
+      <li><strong>bash.</strong> The <code>dev</code>, <code>build</code> and <code>start</code> scripts call <code>bash scripts/with-swc-fallback.sh</code> / <code>bash scripts/build.sh</code>.</li>
+      <li><strong>Accounts: none for the default mode.</strong> The zero-key demo uses the built-in demo agent and the in-memory mock store.</li>
+      <li><strong>Optional, for live mode:</strong> a PayPal Developer account with a sandbox REST app that has <strong>Invoicing</strong> enabled (Developer Dashboard → Apps → Features), and a key for one OpenAI-compatible LLM provider (Groq, OpenRouter, Google AI Studio or OpenAI, as listed in <code>.env.example</code>).</li>
+    </ul>
+    <p class="wd-source">Source: <code>package.json</code>, <code>render.yaml</code>, <code>.env.example</code>, <code>README.md</code></p>
+  </section>
+  <!-- workdocs:end id=prereq -->
+
+  <!-- workdocs:begin id=install -->
+  <section id="install">
+    <h2>Install</h2>
+    <pre><code>git clone https://github.com/nnquangit/paypal-invoice-copilot.git
+cd paypal-invoice-copilot
+npm ci</code></pre>
+    <p>No config file is needed for the demo. For live mode, copy the example file and fill it in (next section):</p>
+    <pre><code>cp .env.example .env.local</code></pre>
+    <p class="wd-source">Source: <code>README.md</code> (Quick start, Live PayPal sandbox + LLM)</p>
+  </section>
+  <!-- workdocs:end id=install -->
+
+  <!-- workdocs:begin id=config -->
+  <section id="config">
+    <h2>Configuration</h2>
+    <p>All settings are environment variables read on the server. Names and defaults below come from the code; never commit real values (<code>.env*</code> is git-ignored except <code>.env.example</code>).</p>
+    <div class="wd-table"><table>
+      <thead><tr><th>Variable</th><th>Purpose</th><th>Default (code)</th><th>Required</th></tr></thead>
+      <tbody>
+        <tr><td><code>PAYPAL_CLIENT_ID</code>, <code>PAYPAL_CLIENT_SECRET</code></td><td>Sandbox REST app credentials. Both set, sandbox environment and no hosted platform → the PayPal Agent Toolkit is built with <code>sandbox: true</code> (<code>isPayPalConfigured</code>)</td><td>unset → local mock desk</td><td>Live PayPal only</td></tr>
+        <tr><td><code>PAYPAL_ENVIRONMENT</code></td><td>Sandbox-only build: empty or <code>sandbox</code> is accepted. Any other value (<code>live</code>, <code>production</code>, …) <strong>disables PayPal</strong>, and the badge shows the warning.</td><td><code>sandbox</code></td><td>No</td></tr>
+        <tr><td><code>LLM_API_KEY</code></td><td>Set → the LLM agent replaces the demo agent (<code>isLlmConfigured</code>)</td><td>unset → demo agent</td><td>Live LLM only</td></tr>
+        <tr><td><code>LLM_BASE_URL</code></td><td>OpenAI-compatible endpoint. A malformed or non-http(s) value disables the LLM; <code>/api/health</code> keeps working and reports <code>llmConfigError</code>.</td><td><code>https://api.groq.com/openai/v1</code> (<code>DEFAULT_LLM_BASE_URL</code>, <code>src/lib/config.ts</code>)</td><td>No</td></tr>
+        <tr><td><code>LLM_MODEL</code></td><td>Tool-calling model id</td><td><code>openai/gpt-oss-20b</code> (<code>DEFAULT_LLM_MODEL</code>; same in <code>.env.example</code>)</td><td>No</td></tr>
+        <tr><td><code>DEMO_MODE</code></td><td><code>true</code> → both PayPal and LLM count as not configured: mock store and demo agent</td><td>unset</td><td>No</td></tr>
+        <tr><td><code>FORCE_DEMO_AGENT</code></td><td><code>true</code> → <code>/api/chat</code> uses the demo agent even with an LLM key, and the badge says so; PayPal unaffected</td><td>unset</td><td>No</td></tr>
+        <tr><td><code>IC_BIND_HOST</code></td><td>Set by <code>scripts/serve.sh</code> to the bind address. Credentials are honoured only when it is <code>127.0.0.1</code>, <code>::1</code> or <code>localhost</code>.</td><td>unset → credentials ignored</td><td>Set automatically</td></tr>
+        <tr><td><code>PUBLIC_DEMO</code></td><td><code>true</code> → <code>serve.sh</code> binds <code>0.0.0.0</code> for public demo hosting. It requires <code>DEMO_MODE=true</code>.</td><td>unset → 127.0.0.1</td><td>Hosted demo only</td></tr>
+        <tr><td><code>VERCEL</code>, <code>RENDER</code></td><td>Set by those platforms. When present, PayPal and LLM credentials are ignored (hosted = zero-key demo only)</td><td>unset locally</td><td>—</td></tr>
+        <tr><td><code>MERCHANT_BUSINESS_NAME</code>, <code>MERCHANT_EMAIL</code>, <code>MERCHANT_GIVEN_NAME</code>, <code>MERCHANT_SURNAME</code></td><td>Merchant profile in the system prompt and on drafts</td><td>placeholder profile in <code>src/lib/config.ts</code></td><td>No</td></tr>
+        <tr><td><code>MERCHANT_EMAIL_USE_ON_INVOICE</code></td><td><code>true</code> → live drafts set <code>invoicer_email_address</code> to <code>MERCHANT_EMAIL</code>. Only use it when that is the sandbox merchant's email (see Troubleshooting)</td><td>unset</td><td>No</td></tr>
+      </tbody>
+    </table></div>
+    <p class="wd-source">Source: <code>src/lib/config.ts</code>, <code>src/lib/llm.ts</code>, <code>src/lib/paypal-tools.ts</code> (<code>getLiveToolkitTools</code>, <code>getInvoiceTools</code>), <code>src/app/api/chat/route.ts</code>, <code>.env.example</code>, <code>.gitignore</code></p>
+  </section>
+  <!-- workdocs:end id=config -->
+
+  <!-- workdocs:begin id=run -->
+  <section id="run">
+    <h2>Run</h2>
+    <pre><code>npm run dev      # bash scripts/serve.sh dev   → next dev -H 127.0.0.1 → http://localhost:3000
+npm run build    # bash scripts/build.sh → next build
+npm start        # bash scripts/serve.sh start → next start -H 127.0.0.1</code></pre>
+    <p><code>scripts/serve.sh</code> chooses the bind address and refuses an extra <code>-H</code>/<code>--hostname</code>. It exports <code>IC_BIND_HOST</code>, and <code>src/lib/config.ts</code> honours PayPal and LLM credentials only when that is a loopback address. A server started another way (plain <code>next start</code>, a public bind) runs as the zero-key demo.</p>
+    <p>Port 3000 is the Next.js default; the README links <code>http://localhost:3000</code>. Restart the dev server after editing <code>.env.local</code>.</p>
+    <p><strong>Force the zero-key demo</strong> in a checkout that already has keys:</p>
+    <pre><code>DEMO_MODE=true FORCE_DEMO_AGENT=true npm run dev</code></pre>
+    <p><strong>Live mode is local-only.</strong> With PayPal or LLM credentials active, every API route answers only loopback requests (<code>localhost</code>, <code>127.0.0.1</code>, <code>[::1]</code>); anything else gets 403 <code>live_mode_local_only</code>. That header check is defence in depth, because headers can be forged. The real control is the 127.0.0.1 bind from <code>npm run dev</code> / <code>npm start</code>.</p>
+    <p><strong>Deploy (demo only).</strong> Vercel (<code>vercel.json</code>: framework, region <code>iad1</code>) and Render (<code>render.yaml</code>: one free instance, <code>npm ci &amp;&amp; npm run build</code>, then <code>npm run start</code> with <code>PUBLIC_DEMO=true</code> and <code>DEMO_MODE=true</code>, which binds <code>0.0.0.0</code>) run the zero-key demo. <code>serve.sh</code> refuses <code>PUBLIC_DEMO=true</code> without <code>DEMO_MODE=true</code>. The app ignores PayPal and LLM credentials there, because it has no authentication and keeps state in one process's memory.</p>
+    <p><strong>Read these docs.</strong> The pages in <code>docs/</code> are static HTML: open <code>docs/index.html</code> directly, or serve the folder with <code>python3 -m http.server 4590 --bind 127.0.0.1 --directory docs</code> and open <code>http://127.0.0.1:4590/</code>.</p>
+    <p class="wd-source">Source: <code>package.json</code> (scripts), <code>scripts/build.sh</code>, <code>scripts/with-swc-fallback.sh</code>, <code>vercel.json</code>, <code>render.yaml</code>, <code>README.md</code></p>
+  </section>
+  <!-- workdocs:end id=run -->
+
+  <!-- workdocs:begin id=test -->
+  <section id="test">
+    <h2>Test</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Command</th><th>What it runs</th><th>Needs</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm test</code></td><td><code>vitest run</code> on <code>tests/**/*.test.ts</code>: <code>mock-store.test.ts</code> (store, totals, placeholder QR, demo agent flow), <code>security.test.ts</code> (HITL, ownership, exactly-once, chat/confirm validation, XSS, error redaction, sandbox-only env), <code>live-paths.test.ts</code> (stubbed PayPal toolkit: totals, no fake fallback, probe cache, loopback guard), <code>chat-llm.test.ts</code> (fake LLM model)</td><td>Nothing: no server, no network. Use fake env values only, e.g. <code>env -u PAYPAL_CLIENT_ID -u PAYPAL_CLIENT_SECRET -u LLM_API_KEY DEMO_MODE=true FORCE_DEMO_AGENT=true npm test</code> (the tests stub env themselves).</td></tr>
+        <tr><td><code>npm run test:watch</code></td><td>Vitest in watch mode</td><td>Same</td></tr>
+        <tr><td><code>npm run lint</code></td><td>ESLint (<code>eslint.config.mjs</code>); <code>next build</code> skips lint (<code>ignoreDuringBuilds</code>)</td><td>Nothing</td></tr>
+        <tr><td><code>npm run build</code></td><td>Production build with type checking (<code>ignoreBuildErrors: false</code>)</td><td>Nothing</td></tr>
+      </tbody>
+    </table></div>
+    <p class="wd-note">The PayPal and LLM paths are tested against stubs (an injected fake toolkit via <code>__setToolkitFactoryForTests</code>, and a fake model). Under Vitest the real toolkit refuses to load. Real PayPal sandbox behaviour is not covered automatically; the live sandbox flow was checked by hand for the demo video. These suites were added in the 2026-11-07 code-fix pass. Their results are recorded in <code>.agent-reports/code-fixes-result.md</code>.</p>
+    <p class="wd-source">Source: <code>package.json</code>, <code>vitest.config.ts</code>, <code>tests/*.test.ts</code>, <code>tests/helpers.ts</code>, <code>next.config.ts</code></p>
+  </section>
+  <!-- workdocs:end id=test -->
+
+  <!-- workdocs:begin id=verify -->
+  <section id="verify">
+    <h2>Verify</h2>
+    <ol>
+      <li>Open <code>http://localhost:3000</code>. The header badges read <strong>Demo mode</strong>, <strong>PayPal: local mock (no PayPal calls)</strong> and <strong>LLM: built-in demo agent</strong> with no keys set (<code>src/components/ModeBadge.tsx</code>). The desk shows two seeded invoices, <code>INV-1001</code> (SENT, USD 850.00) and <code>INV-1000</code> (PAID, USD 1200.00).</li>
+      <li>Ask the health route:
+        <pre><code>curl -s http://localhost:3000/api/health</code></pre>
+        Expect <code>"ok": true</code> and a <code>mode</code> object. In live mode <code>paypalInvoicingOk: true</code> means the Invoicing probe passed.</li>
+      <li>Send <code>Invoice Acme Corp $500 for logo design, due in 14 days</code>; a local mock draft and a <strong>Human confirmation required</strong> card appear. Confirm, and the desk shows the invoice as SENT (local desk only, no email is sent).</li>
+    </ol>
+    <p class="wd-source">Source: <code>src/app/api/health/route.ts</code>, <code>src/lib/mock-store.ts</code> (<code>seed</code>), <code>src/components/ConfirmCard.tsx</code></p>
+  </section>
+  <!-- workdocs:end id=verify -->
+
+  <!-- workdocs:begin id=trouble -->
+  <section id="trouble">
+    <h2>Troubleshooting</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Symptom</th><th>Cause (from code)</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Badge says "PayPal: sandbox · invoicing unavailable"</td><td>Credentials are set, but the probe fails (for example the REST app lacks the Invoicing feature). The agent then uses the local mock tools, and every result says <code>source: "local-mock"</code>.</td><td>Enable <strong>Invoicing</strong> under Apps &amp; Credentials → Features. The probe result is cached for 15 s on failure, 60 s on success.</td></tr>
+        <tr><td>Badge shows "PAYPAL_ENVIRONMENT=… rejected"</td><td>Sandbox-only build</td><td>Use <code>sandbox</code> or leave it empty</td></tr>
+        <tr><td>API returns 403 <code>live_mode_local_only</code></td><td>Live credentials are active and the request did not come from loopback</td><td>Open the app on <code>http://localhost:3000</code> on the same machine, or use <code>DEMO_MODE=true</code></td></tr>
+        <tr><td>Badge shows "PayPal credentials ignored: the server is not bound to loopback"</td><td>The server was not started with <code>npm run dev</code> / <code>npm start</code>, or <code>PUBLIC_DEMO=true</code> was set</td><td>Start with <code>npm run dev</code></td></tr>
+        <tr><td>Confirm says "… outcome_unknown"</td><td>The request reached (or may have reached) PayPal, but the call failed ambiguously (network error or 5xx). The action is never retried.</td><td>Check the invoice in the PayPal sandbox dashboard, then propose a new action only if it did not happen</td></tr>
+        <tr><td>Confirm says "Not executed (HTTP 403 · forbidden)"</td><td>The pending action belongs to another browser session (cookie <code>ic_sid</code>)</td><td>Ask again in this browser</td></tr>
+        <tr><td>Chat replies <code>LLM error: …</code> (HTTP 502)</td><td>The LLM call failed. Only a category and HTTP status are shown; the redacted detail is in the server log.</td><td>Check <code>LLM_*</code> (default model <code>openai/gpt-oss-20b</code>)</td></tr>
+        <tr><td>Live send fails with "User is not associated with paypal"</td><td>An invoicer email that is not the sandbox merchant's (comment in <code>getInvoiceTools</code>)</td><td>Leave <code>MERCHANT_EMAIL_USE_ON_INVOICE</code> unset, or set <code>MERCHANT_EMAIL</code> to the sandbox merchant email</td></tr>
+        <tr><td>"Native SWC unavailable … using WASM fallback"</td><td>The native SWC binary fails to load on some Linux hosts</td><td>Nothing to do: the script moves it aside and uses <code>@next/swc-wasm-nodejs</code> (it may run <code>npm install --no-save</code> once)</td></tr>
+        <tr><td>"I didn't catch that."</td><td>The demo agent only knows fixed phrasings (regular expressions)</td><td>Use the suggestion chips or the examples in the reply</td></tr>
+        <tr><td>Invoices disappear after a restart or between serverless instances; confirm returns 404 <code>not_found</code></td><td>The store and pending actions live in one process's memory (<code>globalThis</code>)</td><td>Expected for the prototype. Run a single process; restart to reseed the demo state.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="wd-source">Source: <code>src/lib/paypal-tools.ts</code>, <code>src/app/api/chat/route.ts</code>, <code>src/components/ModeBadge.tsx</code>, <code>scripts/with-swc-fallback.sh</code>, <code>src/lib/demo-agent.ts</code>, <code>src/lib/mock-store.ts</code></p>
+  </section>
+  <!-- workdocs:end id=trouble -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh and the code-fix pass, 2026-11-07; sources: package.json, README.md, .env.example, render.yaml, vercel.json, scripts/*.sh, src/lib/*.ts, src/app/api/*/route.ts, tests/*.test.ts.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
 </body>
 </html>

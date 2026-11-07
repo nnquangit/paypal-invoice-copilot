@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bash scripts/with-swc-fallback.sh next dev",
+    "dev": "bash scripts/serve.sh dev",
     "build": "bash scripts/build.sh",
-    "start": "bash scripts/with-swc-fallback.sh next start",
+    "start": "bash scripts/serve.sh start",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -35,7 +35,11 @@ export interface Invoice {
   reminder_count: number;
   created_at: string;
   updated_at: string;
+  /** Provenance: real PayPal sandbox record vs local in-memory mock row. */
+  source?: InvoiceSource;
 }
+
+export type InvoiceSource = "paypal-sandbox" | "local-mock";
 
 export interface PendingAction {
   id: string;
@@ -50,8 +54,15 @@ export interface AppMode {
   demoMode: boolean;
   paypalConfigured: boolean;
   llmConfigured: boolean;
-  paypalEnvironment: "sandbox" | "live" | "mock";
+  /** "sandbox" = PayPal sandbox API in use; "mock" = local in-memory desk, no PayPal calls. */
+  paypalEnvironment: "sandbox" | "mock";
   llmProvider: string;
+  /** Why present PayPal credentials are not used (sandbox-only / hosted restriction). */
+  paypalConfigError?: string;
+  /** Why a present LLM key is not used (bad base URL / hosted restriction). */
+  llmConfigError?: string;
+  /** False when live credentials are active but this request is not from loopback. */
+  liveAccess?: boolean;
   /** False when OAuth works but Invoicing feature/scope is missing on the REST app. */
   paypalInvoicingOk?: boolean;
   paypalInvoicingMessage?: string;

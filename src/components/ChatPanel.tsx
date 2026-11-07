@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ConfirmCard } from "./ConfirmCard";
+import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { AppMode, PendingAction } from "@/lib/types";
 
 type UiMessage = {
@@ -19,17 +20,42 @@ const SUGGESTIONS = [
   "Show QR for INV-1001",
 ];
 
-function renderMarkdownLite(text: string) {
-  // very small markdown subset for demo responses
-  const html = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/!\[([^\]]*)\]\((data:image[^)]+)\)/g, '<img alt="$1" src="$2" class="mt-2 rounded-lg border border-slate-200 bg-white p-2" width="140" height="140" />')
-    .replace(/\n/g, "<br/>");
-  return { __html: html };
+/** History sent to /api/chat (server caps at 40 messages). */
+const HISTORY_LIMIT = 30;
+
+type ConfirmResponse = {
+  status?: string;
+  code?: string;
+  error?: string;
+  retryable?: boolean;
+  source?: string;
+  href?: string;
+  paypal_status?: string;
+  invoice?: { id?: string; invoice_number?: string; recipient_email?: string; reminder_count?: number; href?: string };
+  previous_result?: ConfirmResponse;
+};
+
+function where(data: ConfirmResponse): string {
+  return data.source === "paypal-sandbox"
+    ? "on PayPal sandbox"
+    : "in the local mock desk (no PayPal call, no email sent)";
+}
+
+function describeSuccess(data: ConfirmResponse): string {
+  const num = data.invoice?.invoice_number || data.invoice?.id || "invoice";
+  const link = data.href || data.invoice?.href;
+  switch (data.status) {
+    case "sent":
+      return `Sent **${num}**${data.invoice?.recipient_email ? ` to ${data.invoice.recipient_email}` : ""} ${where(data)}.${
+        data.invoice?.id ? `\nID: \`${data.invoice.id}\`` : ""
+      }${link ? `\nLink: ${link}` : ""}`;
+    case "reminded":
+      return `Reminder recorded for **${num}** ${where(data)} (reminders: ${data.invoice?.reminder_count ?? "?"}).`;
+    case "cancelled":
+      return `Cancelled **${num}** ${where(data)}.`;
+    default:
+      return `Done (${data.status || "ok"}) ${where(data)}.`;
+  }
 }
 
 export function ChatPanel({
@@ -73,18 +99,21 @@ export function ChatPanel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: next.map((m) => ({ role: m.role, content: m.content })),
+          messages: next
+            .slice(-HISTORY_LIMIT)
+            .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) })),
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!data) throw new Error(`HTTP ${res.status}`);
       const assistant: UiMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
-        content: data.text || "Done.",
-        pendingAction: data.pendingAction || undefined,
+        content: data.text || data.error || (res.ok ? "Done." : `Request failed (HTTP ${res.status}).`),
+        pendingAction: res.ok ? data.pendingAction || undefined : undefined,
       };
       // Also surface needs_confirmation from toolResults (LLM path)
-      if (!assistant.pendingAction && Array.isArray(data.toolResults)) {
+      if (res.ok && !assistant.pendingAction && Array.isArray(data.toolResults)) {
         for (const tr of data.toolResults) {
           const result = tr?.result || tr;
           if (result?.status === "needs_confirmation" && result.pending_action_id) {
@@ -117,6 +146,8 @@ export function ChatPanel({
 
   async function handleConfirm(action: PendingAction, confirmed: boolean) {
     setConfirmBusy(action.id);
+    let text: string;
+    let keepCard = false;
     try {
       const res = await fetch("/api/confirm", {
         method: "POST",
@@ -126,47 +157,38 @@ export function ChatPanel({
           confirmed,
         }),
       });
-      const data = await res.json();
-      const text = confirmed
-        ? data.status === "sent"
-          ? `Sent **${data.invoice?.invoice_number || data.paypal_status || "invoice"}**${
-              data.invoice?.recipient_email ? ` to ${data.invoice.recipient_email}` : ""
-            } on PayPal sandbox.\nID: \`${data.invoice?.id || ""}\`\nLink: ${
-              data.href || data.invoice?.href || "PayPal invoice"
-            }`
-          : data.status === "reminded"
-            ? `Reminder sent for **${data.invoice?.invoice_number}** (reminders: ${data.invoice?.reminder_count}).`
-            : data.status === "cancelled"
-              ? `Cancelled **${data.invoice?.invoice_number}**.`
-              : data.status === "executed_live"
-                ? `Executed on live PayPal sandbox: \`${data.tool}\`${
-                    data.href ? `\nLink: ${data.href}` : ""
-                  }`
-                : data.status === "live_error"
-                  ? `PayPal live error: ${data.error || "unknown"}`
-                  : data.fell_back_from_live && data.invoice
-                    ? `Sent **${data.invoice?.invoice_number}** (local desk fallback).\nLink: ${
-                        data.invoice?.href || "n/a"
-                      }`
-                    : JSON.stringify(data, null, 2)
-        : "Okay — I cancelled that action. Nothing was sent.";
-
-      setMessages((m) => [
-        ...m.map((msg) =>
-          msg.pendingAction?.id === action.id
-            ? { ...msg, pendingAction: undefined }
-            : msg
-        ),
-        {
-          id: `c-${Date.now()}`,
-          role: "assistant",
-          content: text,
-        },
-      ]);
-      onInvoicesChanged();
+      const data = ((await res.json().catch(() => null)) || {}) as ConfirmResponse;
+      if (res.ok && data.status !== "error") {
+        text = confirmed ? describeSuccess(data) : "Okay — I cancelled that action. Nothing was sent.";
+      } else if (data.code === "already_executed" && data.previous_result) {
+        text = `Already done earlier — not repeated. ${describeSuccess(data.previous_result)}`;
+      } else {
+        keepCard = Boolean(data.retryable);
+        text = `Not executed (HTTP ${res.status}${data.code ? ` · ${data.code}` : ""}): ${
+          data.error || "unknown error"
+        }${keepCard ? "\nYou can press Confirm again to retry." : ""}`;
+      }
+    } catch (err) {
+      // Browser↔server failure: keep the card. Pressing Confirm again is safe because
+      // the server dispatches each pending action at most once and otherwise
+      // answers with the stored result or an outcome_unknown notice.
+      keepCard = true;
+      text = `Could not reach the server (${err instanceof Error ? err.message : "network error"}). Press Confirm again to see the result; the server will not dispatch it twice.`;
     } finally {
       setConfirmBusy(null);
     }
+
+    setMessages((m) => [
+      ...m.map((msg) =>
+        msg.pendingAction?.id === action.id && !keepCard ? { ...msg, pendingAction: undefined } : msg
+      ),
+      {
+        id: `c-${Date.now()}`,
+        role: "assistant",
+        content: text,
+      },
+    ]);
+    onInvoicesChanged();
   }
 
   return (
@@ -182,7 +204,11 @@ export function ChatPanel({
             </h1>
             <p className="text-xs text-[var(--pp-muted)]">
               Chat → draft → confirm → PayPal
-              {mode?.demoMode ? " · demo-ready without keys" : " · live sandbox"}
+              {mode
+                ? mode.paypalEnvironment === "sandbox"
+                  ? " · PayPal sandbox"
+                  : " · local mock desk (no PayPal calls)"
+                : ""}
             </p>
           </div>
         </div>
@@ -202,10 +228,7 @@ export function ChatPanel({
               }`}
             >
               {m.role === "assistant" ? (
-                <div
-                  className="prose-chat"
-                  dangerouslySetInnerHTML={renderMarkdownLite(m.content)}
-                />
+                <div className="prose-chat">{renderMarkdownLite(m.content)}</div>
               ) : (
                 m.content
               )}

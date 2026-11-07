@@ -60,7 +60,7 @@ export const TitleScene: React.FC = () => {
           marginBottom: 36,
         }}
       >
-        PayPal Agent Hackathon
+        PayPal AI Hackathon
       </div>
       <Interactive.H1
         name="Title"

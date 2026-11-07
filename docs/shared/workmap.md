@@ -1,0 +1,60 @@
+---
+lang: en
+---
+# PayPal Invoice Copilot
+
+Workmap: Epic → Feature → Task → Subtask. Update with scripts/workmap.py add/set.
+
+- `1` Product
+  - `P1` Invoice Copilot app
+    - [x] `T1` Next.js chat + desk + tools (2026-11-05) — Demo mode + PayPal toolkit path
+    - [x] `T2` Push to GitHub (2026-11-05)
+- `2` Docs & diagrams
+  - `P2` HTML docs portal
+    - [x] `T3` Init docs-workflow + workmap (2026-11-05)
+    - [x] `T4` English overview + how-it-works + setup (2026-11-05)
+    - [x] `T5` Archify architecture/sequence/lifecycle/workflow (2026-11-05) — Sources under .archify/
+    - [x] `T6` Verify light/dark/375px screenshots — shots in /workspace/out/docs-shots; 375 no overflow; favicon 404 only
+    - [x] `T7` Remove docs-workflow pages (2026-11-07) — owner: claude-opus-5-5 · removed index/how-it-works/setup/submission.html + docs/diagrams/*; kept workmap, docs.css/js, .archify sources
+  - `P3` Workdocs
+    - [x] `T8` Workdocs five pages (2026-11-07) — owner: claude-opus-5-5 · 5 pages + workdocs.css/js, inline SVG arch+sequence (archify CLI denied); static QA ok; browser QA unverified (playwright-cli denied)
+    - [x] `T9` Judge review revision (2026-11-07) — owner: claude-opus-5-5 · 5 review points applied; link+anchor checks rerun; marker/secret recheck denied, not rerun; browser QA unverified
+    - [x] `T29` Six-page static refresh @claude-opus-5-5 (2026-11-07) — 6 static pages (setup.html new), animated flow + step players, local demo video, gallery image; static + browser QA (light/dark, 375px, console, nav); reduced-motion not checked
+    - [x] `T32` Architecture diagrams @claude-opus-5-5 (2026-11-07) — 4 Archify diagrams in docs/diagrams (all finalize gates pass), embedded on Overview + How it works; sources in .archify/
+  - `P8` Submission cleanup
+    - [x] `T27` Stray file removal @claude-opus-5-5 (2026-11-07) — removed agent logs, Qoder/source notes, root media duplicates, .archify, public/ boilerplate, legacy docs.css/js, setup.md, DEMO_SCRIPT.md; gallery → docs/media/gallery
+    - [x] `T28` Workmap format upgrade @claude-opus-5-5 (2026-11-07) — json → workmap.md with stable ids; CLI + template from workmap skill
+- `3` Explainer video
+  - `P4` Remotion
+    - [x] `T10` Scaffold video/ project (2026-11-05)
+    - [x] `T11` Compose 60-90s explainer (2026-11-05) — InvoiceCopilotExplainer 75s 1920x1080
+    - [x] `T12` Render MP4 + poster PNG — /workspace/out/
+    - [x] `T13` English VO + ambient music (2026-11-05) — en-US-AndrewNeural; 65s AAC; bg ffmpeg pad
+    - [x] `T14` Live sandbox E2E + Devpost demo (2026-11-06) — PayPal live SENT e.g. INV2-7GHU…/0004; demo ~113s
+    - [x] `T35` Title text re-render @claude-opus-5-5 (2026-11-07) — Remotion re-render (Kokoro VO); Devpost demo = new intro + original live card/recording, frame-checked vs old at 8 points; explainer poster re-rendered
+  - `P9` Licensing
+    - [x] `T30` Media licence audit @claude-opus-5-5 (2026-11-07) — edge-tts VO has no output licence (Azure grants rights on paid tier only); music ffmpeg-synth; Inter OFL; Remotion free for individuals; deps permissive (sharp/libvips LGPL)
+    - [x] `T31` Free TTS shortlist @claude-opus-5-5 (2026-11-07) — Qwen3-TTS 1.7B CustomVoice (Apache-2.0, speaker Aiden) on 5090; Kokoro-82M (Apache-2.0) fallback; avoid Piper lessac/ryan, F5, XTTS, ElevenLabs free
+    - [x] `T33` Re-voice with open TTS @claude-opus-5-5 (2026-11-07) — Kokoro af_heart VO for both videos (13 cues, ~-20 LUFS, ASR-checked); picture unchanged, audio re-mixed with ffmpeg; srt retimed; video/scripts/kokoro-vo.py
+    - [ ] `T34` YouTube re-upload @quangngo (2026-11-07) — replace the public video with docs/media/devpost-demo.mp4 + new srt, keep Public, update the Devpost link if it changes, before 2026-11-12
+- `4` Ship
+  - `P5` Quality gates
+    - [x] `T15` npm test + npm run build (2026-11-05) — 9 tests pass; next build ok
+    - [x] `T16` Commit and push main — abcceb9 → origin/main
+  - `P6` Publication
+    - [x] `T17` Devpost submission (2026-11-07) — verified 2026-11-07 (user-reported); no extra evidence recorded here
+    - [x] `T18` Public YouTube video (2026-11-07) — verified 2026-11-07 (user-reported); no extra evidence recorded here
+  - `P7` Review follow-ups — Unverified review hypotheses — validate before any fix
+    - [x] `T19` Tool/HITL bypass check @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T20` Sandbox guard check @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T21` Mock/fallback honesty @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T22` Confirm error handling @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T23` XSS & role injection @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T24` QR truth check @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T25` Probe cache check @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T26` Total calculation check @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [x] `T36` Live access guard @claude-opus-5-5-fix (2026-11-07) — verified 2026-11-07: npm test 73/73 (4 files, offline), tsc clean, next build ok; zero-key runtime checks (403/415/already_executed)
+    - [=] `T37` Recorder unlink scope @claude-opus-5-5-fix (2026-11-07) — record-live-demo.mjs: mkdtemp scratch + own output file only, env RECORD_OUT_DIR/APP_URL. Not executed (would hit live app)
+    - [x] `T38` Security docs update @claude-opus-5-5-fix (2026-11-07) — README, SUBMISSION Security & limits, docs/security/setup/api.html updated to new behaviour; backups in .agent-reports/doc-backups-code-fixes
+  - `P10` Submission update
+    - [>] `T39` Verify and test fixes @claude-opus-5-5 (2026-11-07) — TASK-UPDATE-SUBMISSION.md §1

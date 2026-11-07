@@ -1,24 +1,23 @@
+# Public hosted demo = zero-key demo mode only.
+# The app has no user authentication and keeps invoices / pending actions in
+# one process's memory, so it refuses PayPal and LLM credentials when it detects
+# a hosted platform (RENDER / VERCEL env). Run live sandbox mode locally only.
 services:
   - type: web
     name: paypal-invoice-copilot
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
+    numInstances: 1
+    buildCommand: npm ci && npm run build
+    # PUBLIC_DEMO=true makes scripts/serve.sh bind 0.0.0.0 (Render needs that);
+    # it refuses to start unless DEMO_MODE=true, and the app ignores credentials.
     startCommand: npm run start
     envVars:
+      - key: PUBLIC_DEMO
+        value: "true"
       - key: DEMO_MODE
-        value: "false"
-      - key: PAYPAL_ENVIRONMENT
-        value: sandbox
-      - key: PAYPAL_CLIENT_ID
-        sync: false
-      - key: PAYPAL_CLIENT_SECRET
-        sync: false
-      - key: LLM_BASE_URL
-        value: https://api.groq.com/openai/v1
-      - key: LLM_API_KEY
-        sync: false
-      - key: LLM_MODEL
-        value: llama-3.3-70b-versatile
+        value: "true"
+      - key: FORCE_DEMO_AGENT
+        value: "true"
       - key: NODE_VERSION
         value: "20"

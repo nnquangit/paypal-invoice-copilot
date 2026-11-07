@@ -1,9 +1,17 @@
+// Records the live sandbox flow against a LOCAL dev server (live mode is loopback-only).
+// Env: RECORD_OUT_DIR (default: <os tmp>/invoice-copilot-recordings), APP_URL (default http://localhost:3000/).
+// Only touches files this script creates: a fresh mkdtemp scratch dir for Playwright's
+// raw video and the single output file live-app-flow.webm.
 import { chromium } from 'playwright';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
-const outDir = '/workspace/out/recordings';
+const outDir = path.resolve(process.env.RECORD_OUT_DIR || path.join(os.tmpdir(), 'invoice-copilot-recordings'));
+const appUrl = process.env.APP_URL || 'http://localhost:3000/';
 fs.mkdirSync(outDir, { recursive: true });
-for (const f of fs.readdirSync(outDir)) fs.unlinkSync(`${outDir}/${f}`);
+const dest = path.join(outDir, 'live-app-flow.webm');
+const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'invoice-copilot-rec-'));
 
 const browser = await chromium.launch({
   headless: true,
@@ -11,7 +19,7 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext({
   viewport: { width: 1920, height: 1080 },
-  recordVideo: { dir: outDir, size: { width: 1920, height: 1080 } },
+  recordVideo: { dir: scratch, size: { width: 1920, height: 1080 } },
 });
 const page = await context.newPage();
 const sleep = (ms) => page.waitForTimeout(ms);
@@ -26,7 +34,7 @@ async function setReactInput(locator, value) {
   }, value);
 }
 
-await page.goto('http://localhost:3000/', { waitUntil: 'networkidle', timeout: 60000 });
+await page.goto(appUrl, { waitUntil: 'networkidle', timeout: 60000 });
 await page.getByText('Live LLM').waitFor({ timeout: 30000 });
 await sleep(2500);
 
@@ -54,6 +62,9 @@ const video = page.video();
 await context.close();
 await browser.close();
 const videoPath = await video.path();
-const dest = `${outDir}/live-app-flow.webm`;
-fs.renameSync(videoPath, dest);
+// Replace only our own previous output, then remove the (now empty) scratch dir.
+fs.rmSync(dest, { force: true });
+fs.copyFileSync(videoPath, dest);
+fs.unlinkSync(videoPath);
+fs.rmdirSync(scratch);
 console.log('VIDEO', dest, fs.statSync(dest).size);

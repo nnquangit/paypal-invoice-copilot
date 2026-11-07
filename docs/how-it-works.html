@@ -1,85 +1,173 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How PayPal Invoice Copilot works</title>
-<meta name="description" content="Animated workflow: chat → agent → tool call → human confirm → PayPal → desk.">
-<link rel="stylesheet" href="assets/docs.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>How it works · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="Step-by-step path of one create-and-send request in PayPal Invoice Copilot, with failure paths and real vs mock behaviour.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
 <body>
-<div class="wrap">
-  <header class="hero">
-    <div class="eyebrow">PayPal Invoice Copilot</div>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html">Overview</a>
+    <a class="wd-link" href="setup.html">Setup</a>
+    <a class="wd-link" href="how-it-works.html" aria-current="page">How it works</a>
+    <a class="wd-link" href="security.html">Security</a>
+    <a class="wd-link" href="api.html">API</a>
+    <a class="wd-link" href="demo.html">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
     <h1>How it works</h1>
-    <p class="lead">A freelancer chats a billing intent. The agent drafts a PayPal invoice, pauses on a confirmation card for send / remind / cancel, then updates the invoice desk with status, payment link, and QR.</p>
+    <p class="wd-lead">One request, "Invoice Acme Corp $500 for logo design, due in 14 days", traced through the code from chat to confirmed send.</p>
   </header>
 
-  <section class="card flow playing" id="flow" aria-labelledby="h-flow">
-    <h2 id="h-flow">Animated overview</h2>
-    <p class="sub">Packets follow the main path. Pause anytime if motion is distracting.</p>
-    <svg viewBox="0 0 980 220" role="img" aria-label="User chat to agent to tools to confirm to PayPal to desk.">
-      <path id="w1" class="wire" d="M130 110 H250"/>
-      <path id="w2" class="wire" d="M370 110 H490"/>
-      <path id="w3" class="wire" d="M610 110 H730"/>
-      <path id="w4" class="wire" d="M850 110 H930"/>
-      <g><rect x="20" y="80" width="110" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="75" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Chat</text></g>
-      <g><rect x="250" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="310" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Agent</text></g>
-      <g><rect x="490" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="550" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Tools</text></g>
-      <g><rect x="730" y="80" width="120" height="60" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="790" y="115" text-anchor="middle" fill="var(--text)" font-size="13">Confirm</text></g>
-      <g><rect x="850" y="160" width="110" height="44" rx="12" fill="var(--node)" stroke="var(--node-stroke)"/><text x="905" y="187" text-anchor="middle" fill="var(--text)" font-size="12">PayPal</text></g>
-      <path id="w5" class="wire" d="M790 140 V160 H905"/>
+  <!-- workdocs:begin id=flow -->
+  <section id="flow" class="wd-flow playing">
+    <h2>Big picture</h2>
+    <p>Chat text goes to <code>/api/chat</code>, where the demo agent or the LLM calls the invoice tools. Tools that write to a client (send, remind, cancel) only record a pending action. A click on the confirmation card posts to <code>/api/confirm</code>, and <code>executePendingAction</code> runs it against the PayPal Agent Toolkit or the in-memory store. The desk then refreshes from <code>/api/invoices</code>.</p>
+    <svg class="wd-diagram" viewBox="0 0 900 250" role="img" aria-label="ChatPanel posts to /api/chat, which runs the demo agent or the LLM; the agent calls the invoice tools, which use the mock store by default or the PayPal sandbox when keys are set and the probe passes. ChatPanel also posts confirmations to /api/confirm, which calls executePendingAction; that writes to PayPal or to the mock store.">
+      <path id="w1" class="wire" d="M170 70 H230"/>
+      <path id="w2" class="wire" d="M370 70 H430"/>
+      <path id="w3" class="wire" d="M570 70 H630"/>
+      <path id="w4" class="wire" d="M740 60 H770"/>
+      <path id="w5" class="wire" d="M740 85 H755 V190 H770"/>
+      <path id="w6" class="wire" d="M100 100 V190 H230"/>
+      <path id="w7" class="wire" d="M370 190 H430"/>
+      <path id="w8" class="wire" d="M600 205 H770"/>
+      <path id="w9" class="wire" d="M515 160 V130 H825 V90"/>
+      <rect class="box" x="30" y="40" width="140" height="60" rx="12"/><text x="100" y="68" text-anchor="middle">ChatPanel</text><text class="muted" x="100" y="86" text-anchor="middle">browser</text>
+      <rect class="box" x="230" y="40" width="140" height="60" rx="12"/><text x="300" y="68" text-anchor="middle">/api/chat</text><text class="muted" x="300" y="86" text-anchor="middle">chat/route.ts</text>
+      <rect class="box" x="430" y="40" width="140" height="60" rx="12"/><text x="500" y="68" text-anchor="middle">Agent</text><text class="muted" x="500" y="86" text-anchor="middle">demo agent or LLM</text>
+      <rect class="box" x="630" y="40" width="110" height="60" rx="12"/><text x="685" y="68" text-anchor="middle">Invoice tools</text><text class="muted" x="685" y="86" text-anchor="middle">paypal-tools.ts</text>
+      <rect class="box sim" x="770" y="30" width="110" height="60" rx="12"/><text x="825" y="58" text-anchor="middle">Mock store</text><text class="muted" x="825" y="76" text-anchor="middle">default</text>
+      <rect class="box" x="770" y="160" width="110" height="60" rx="12"/><text x="825" y="188" text-anchor="middle">PayPal sandbox</text><text class="muted" x="825" y="206" text-anchor="middle">keys + probe</text>
+      <rect class="box" x="230" y="160" width="140" height="60" rx="12"/><text x="300" y="188" text-anchor="middle">/api/confirm</text><text class="muted" x="300" y="206" text-anchor="middle">confirm/route.ts</text>
+      <rect class="box" x="430" y="160" width="170" height="60" rx="12"/><text x="515" y="188" text-anchor="middle">executePendingAction</text><text class="muted" x="515" y="206" text-anchor="middle">after Confirm</text>
+      <text class="muted" x="165" y="182" text-anchor="middle">Confirm click</text>
       <g aria-hidden="true">
-        <circle class="packet" r="5"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
-        <circle class="packet" r="5"><animateMotion dur="1.4s" begin=".35s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
-        <circle class="packet" r="5"><animateMotion dur="1.4s" begin=".7s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
-        <circle class="packet" r="5"><animateMotion dur="1.4s" begin="1.05s" repeatCount="indefinite"><mpath href="#w5"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.2s" repeatCount="indefinite"><mpath href="#w1"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.2s" begin=".4s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.2s" begin=".8s" repeatCount="indefinite"><mpath href="#w3"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1s" begin="1.1s" repeatCount="indefinite"><mpath href="#w4"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.6s" begin="1.3s" repeatCount="indefinite"><mpath href="#w5"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.8s" begin=".2s" repeatCount="indefinite"><mpath href="#w6"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.2s" begin="1s" repeatCount="indefinite"><mpath href="#w7"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.4s" begin="1.5s" repeatCount="indefinite"><mpath href="#w8"/></animateMotion></circle>
+        <circle class="packet" r="5"><animateMotion dur="1.8s" begin="1.7s" repeatCount="indefinite"><mpath href="#w9"/></animateMotion></circle>
       </g>
     </svg>
-    <div class="toolbar"><button class="btn" id="flowToggle">⏸ Pause animation</button></div>
+    <p>The dashed box is the default: with no keys every write lands in the in-memory store. The PayPal path is taken only when both PayPal keys are set, the server is bound to loopback (<code>scripts/serve.sh</code>), it is not a hosted deploy, and the cached Invoicing probe (<code>probePayPalInvoicing</code>) succeeds. Every request first passes <code>guardRequest</code>.</p>
+    <p class="wd-source">Source: <code>src/components/ChatPanel.tsx</code> (<code>send</code>, <code>handleConfirm</code>), <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/paypal-tools.ts</code> (<code>getInvoiceTools</code>, <code>executePendingAction</code>)</p>
   </section>
+  <!-- workdocs:end id=flow -->
 
-  <section class="card" aria-labelledby="h-wf">
-    <h2 id="h-wf">Workflow diagram</h2>
-    <p class="sub">Archify workflow with trace animation — chat → draft → ConfirmCard → send → desk.</p>
-    <div class="frame"><iframe src="diagrams/workflow-main.html" title="Main workflow" loading="lazy"></iframe></div>
-    <div class="frame-note"><a href="diagrams/workflow-main.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  <!-- workdocs:begin id=steps -->
+  <section id="steps">
+    <h2>Step by step</h2>
+    <p>One request, <code>Invoice Acme Corp $500 for logo design, due in 14 days</code>, from chat to confirmed send. The diagram walks through the steps below on its own.</p>
+    <ol class="wd-steps" data-player data-lanes="ui=ChatPanel|browser;chat=/api/chat|chat/route.ts;agent=Agent|demo or LLM;tools=Invoice tools|paypal-tools.ts;confirm=/api/confirm|confirm/route.ts;store=Store / PayPal|by provenance">
+      <li data-from="ui" data-to="chat" data-label="POST {messages}"><b>Send</b> — <code>src/components/ChatPanel.tsx</code> posts the last 30 messages as JSON. <code>src/lib/access.ts:guardRequest</code> rejects non-JSON (415), cross-origin requests (403) and, while live credentials are active, non-loopback callers (403); <code>src/lib/chat-input.ts:parseChatBody</code> accepts only <code>user</code>/<code>assistant</code> text with size limits. <code>ensureSession</code> sets the HttpOnly <code>ic_sid</code> cookie.</li>
+      <li data-from="chat" data-to="agent" data-label="pick agent"><b>Pick the agent</b> — <code>src/app/api/chat/route.ts:POST</code> runs <code>runDemoAgent</code> unless <code>isLlmConfigured()</code> (an LLM key, no <code>DEMO_MODE</code>/<code>FORCE_DEMO_AGENT</code>, a loopback bind, a valid base URL); otherwise <code>getInvoiceTools({owner})</code> + <code>generateText</code> with <code>maxSteps: 6</code>.</li>
+      <li data-from="agent" data-to="tools" data-label="create_invoice"><b>Draft</b> — demo path: <code>src/lib/demo-agent.ts:runDemoAgent</code> extracts amount, business, service and due days and calls <code>mock.createInvoice</code> (row source <code>local-mock</code>). LLM path with a passing probe: <code>create_invoice</code> creates a PayPal sandbox draft and keeps a desk row via <code>mock.upsertLiveInvoice</code> (source <code>paypal-sandbox</code>); on a PayPal error it returns the error and creates nothing.</li>
+      <li data-from="agent" data-to="tools" data-label="send_invoice"><b>Propose, do not act</b> — <code>send_invoice</code>, <code>send_invoice_reminder</code> and <code>cancel_sent_invoice</code> call <code>proposeAction</code> → <code>src/lib/pending.ts:createPendingAction</code> (owner = session, 15-minute TTL) and return <code>needs_confirmation</code>. The model has no tool that can confirm. If it drafted but did not propose a send, the route proposes one (<code>auto-queue-send</code>); it never executes.</li>
+      <li data-from="chat" data-to="ui" data-kind="ret" data-label="text + pendingAction"><b>Show the card</b> — the reply carries <code>pendingAction</code> and its summary says where it will run ("local mock desk" or "PayPal sandbox"); <code>ChatPanel</code> renders <code>ConfirmCard</code>.</li>
+      <li data-from="ui" data-to="confirm" data-label="POST {id, confirmed}"><b>Confirm</b> — <code>/api/confirm</code> validates <code>{pending_action_id, confirmed}</code> and reads the owner from the cookie. <code>confirmed:false</code> cancels the action (<code>cancelled_by_user</code>).</li>
+      <li data-from="confirm" data-to="store" data-label="executePendingAction"><b>Execute once</b> — <code>src/lib/paypal-tools.ts:executePendingAction</code> claims the action (other session 403, expired 410, already done 409). Local rows change status in memory; PayPal rows go to the toolkit after a cached probe. Failure before dispatch returns it to pending (up to 3 tries); a dispatched call with an unknown result becomes <code>outcome_unknown</code> and is never retried.</li>
+      <li data-from="confirm" data-to="ui" data-kind="ret" data-label="{status, invoice}"><b>Refresh</b> — <code>ChatPanel</code> prints the result with its source, keeps the card only if the action is retryable, and <code>AppShell</code> reloads <code>/api/health</code> and <code>/api/invoices</code>.</li>
+    </ol>
+    <p class="wd-source">Source: files named in each step; checked by running the zero-key build on 2026-11-07 (draft → Confirm → SENT; a second Confirm returned <code>already_executed</code>; no cookie → 403; cross-origin → 403; form post → 415).</p>
   </section>
+  <!-- workdocs:end id=steps -->
 
-  <section class="card" aria-labelledby="h-seq">
-    <h2 id="h-seq">Create + send sequence</h2>
-    <div class="frame"><iframe src="diagrams/sequence-create-send.html" title="Create and send sequence" loading="lazy"></iframe></div>
-    <div class="frame-note"><a href="diagrams/sequence-create-send.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+  <!-- workdocs:begin id=components -->
+  <section id="components">
+    <h2>Key components</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Component</th><th>Responsibility</th><th>File</th></tr></thead>
+      <tbody>
+        <tr><td>AppShell</td><td>Layout; loads mode and desk data</td><td><code>src/components/AppShell.tsx</code></td></tr>
+        <tr><td>ChatPanel / ConfirmCard</td><td>Chat, suggestion chips, markdown rendered as React elements (no HTML strings), confirmation card, error handling</td><td><code>src/components/ChatPanel.tsx</code>, <code>src/lib/markdown-lite.ts</code>, <code>ConfirmCard.tsx</code></td></tr>
+        <tr><td>InvoiceDashboard / ModeBadge</td><td>Desk list, totals and source label; mode badges and config warnings</td><td><code>src/components/InvoiceDashboard.tsx</code>, <code>ModeBadge.tsx</code></td></tr>
+        <tr><td>Request guard + session</td><td>Same-origin JSON, loopback-only while live, HttpOnly session cookie</td><td><code>src/lib/access.ts</code></td></tr>
+        <tr><td>Chat route</td><td>Validates the body, chooses the agent, runs the tool loop, extracts the pending action</td><td><code>src/app/api/chat/route.ts</code>, <code>src/lib/chat-input.ts</code></td></tr>
+        <tr><td>Confirm route</td><td>The only path that executes send / remind / cancel</td><td><code>src/app/api/confirm/route.ts</code></td></tr>
+        <tr><td>Pending actions</td><td>Owner, TTL, one-time claim, retry and <code>outcome_unknown</code> states</td><td><code>src/lib/pending.ts</code></td></tr>
+        <tr><td>Invoice tools</td><td>Tool schemas, cached toolkit and probe, provenance routing, execution</td><td><code>src/lib/paypal-tools.ts</code></td></tr>
+        <tr><td>Demo agent</td><td>Regex intent parser for zero-key mode</td><td><code>src/lib/demo-agent.ts</code></td></tr>
+        <tr><td>Mock store</td><td>In-memory invoices with source labels, totals in cents, placeholder QR</td><td><code>src/lib/mock-store.ts</code></td></tr>
+        <tr><td>Config / errors / LLM / prompt</td><td>Sandbox-only mode detection, bind and hosting checks; redacted public errors; provider; system prompt</td><td><code>src/lib/config.ts</code>, <code>errors.ts</code>, <code>llm.ts</code>, <code>system-prompt.ts</code></td></tr>
+      </tbody>
+    </table></div>
   </section>
+  <!-- workdocs:end id=components -->
 
-  <section class="card" id="steps" aria-labelledby="h-steps">
-    <h2 id="h-steps">Step player</h2>
-    <p class="sub">Play or step through one create-and-send request.</p>
-    <svg data-stage role="img" aria-label="Step player for create and send"></svg>
-    <div class="step-info" aria-live="polite"><div data-no>1</div><div><div data-phase></div><h3 data-title></h3><div data-desc></div></div></div>
-    <div class="toolbar"><button class="btn" data-prev aria-label="Previous">←</button><button class="btn primary" data-play>▶ Play</button><button class="btn" data-next aria-label="Next">→</button><div data-dots></div></div>
+  <!-- workdocs:begin id=errors -->
+  <section id="errors">
+    <h2>Failure paths</h2>
+    <ul>
+      <li><strong>Bad request</strong>: non-JSON POST → 415; cross-origin → 403; invalid JSON or schema → 400; non-loopback caller while live credentials are active → 403 <code>live_mode_local_only</code>.</li>
+      <li><strong>LLM call throws</strong> → <code>/api/chat</code> returns 502 with a sanitized category (<code>publicLlmError</code>): no key, URL or raw provider body. A model that calls an unknown tool, such as <code>confirm_pending_action</code>, fails the same way and nothing executes.</li>
+      <li><strong>PayPal not usable</strong> (credentials missing, rejected config, hosted deploy, non-loopback bind, probe failing): the tools stay on the local mock desk and the badge and <code>/api/health</code> say why.</li>
+      <li><strong>Live create or list fails</strong> → the error is returned; no mock rows are substituted. <code>/api/invoices</code> answers 502 with <code>items: []</code>.</li>
+      <li><strong>Confirm</strong>: other session 403; unknown 404; expired 410; already executed, in progress, failed, cancelled or <code>outcome_unknown</code> 409; invalid invoice state 409 (terminal <code>failed</code>); PayPal unavailable before dispatch 503 (back to pending, retryable up to 3 times); PayPal 4xx 502 <code>paypal_rejected</code>; dispatched with an unknown result 502 <code>outcome_unknown</code> (never retried; check the PayPal dashboard); unexpected 500.</li>
+    </ul>
+    <p class="wd-source">Source: <code>src/lib/access.ts</code>, <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/pending.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/errors.ts</code>; covered by <code>tests/security.test.ts</code> and <code>tests/live-paths.test.ts</code></p>
   </section>
-</div>
-<script type="module">
-import { renderNav, stepPlayer, pauseToggle } from "./assets/docs.js";
-renderNav();
-pauseToggle(document.getElementById("flow"), document.getElementById("flowToggle"));
-stepPlayer(document.getElementById("steps"), {
-  participants: [
-    { id: "user", label: "Freelancer", sub: "chat" },
-    { id: "api", label: "/api/chat", sub: "demo/LLM" },
-    { id: "tools", label: "Tools", sub: "paypal-tools" },
-    { id: "confirm", label: "Confirm", sub: "/api/confirm" },
-    { id: "paypal", label: "PayPal", sub: "sandbox/mock" },
-  ],
-  steps: [
-    ["Ask", "user", "api", "Invoice Acme $500…", "", "Natural-language billing intent from ChatPanel."],
-    ["Draft", "api", "tools", "create_invoice", "", "Demo agent or AI SDK calls create_invoice; status stays DRAFT."],
-    ["Propose", "tools", "user", "ConfirmCard", "ret", "send_invoice returns needs_confirmation — no email yet."],
-    ["Gate", "user", "confirm", "Confirm send", "", "Freelancer accepts the human-in-the-loop card."],
-    ["Send", "confirm", "paypal", "executePendingAction", "", "Mock store or @paypal/agent-toolkit marks the invoice SENT."],
-    ["Desk", "paypal", "user", "status + QR", "ret", "Invoice desk refreshes unpaid totals and payment link."],
-  ],
-});
-</script>
+  <!-- workdocs:end id=errors -->
+
+  <!-- workdocs:begin id=real-vs-mock -->
+  <section id="real-vs-mock">
+    <h2>Real vs simulated</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Piece</th><th>Real implementation</th><th>Simulated implementation</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>Agent</td><td>LLM via <code>@ai-sdk/openai-compatible</code></td><td><code>runDemoAgent</code> (regex)</td><td>Simulated</td></tr>
+        <tr><td>Invoice backend</td><td><code>@paypal/agent-toolkit/ai-sdk</code>, sandbox only</td><td>In-memory store, rows labelled <code>local-mock</code></td><td>Simulated</td></tr>
+        <tr><td>Tools the LLM sees</td><td colspan="2">Compact schemas from <code>buildMockInvoiceTools</code>; with a passing probe <code>create_invoice</code> and <code>list_invoices</code> call PayPal; send/remind/cancel only propose. No confirm tool exists.</td><td>—</td></tr>
+        <tr><td>QR</td><td>none wired</td><td>Graphic labelled PLACEHOLDER</td><td>Simulated in both modes</td></tr>
+      </tbody>
+    </table></div>
+    <p class="wd-note">The automated tests never call PayPal or an LLM: <code>tests/live-paths.test.ts</code> injects a stub toolkit (<code>__setToolkitFactoryForTests</code>) and <code>tests/chat-llm.test.ts</code> a fake model; the real toolkit refuses to load under Vitest. The live path (Groq tool calling, PayPal sandbox draft, confirmed send) was checked by hand for the published demo video, which was recorded before the 2026-11-07 hardening, so its on-screen wording differs from the current UI.</p>
+    <p class="wd-source">Source: <code>src/lib/paypal-tools.ts</code>, <code>src/lib/llm.ts</code>, <code>tests/*.test.ts</code>, <code>docs/media/devpost-demo.srt</code></p>
+  </section>
+  <!-- workdocs:end id=real-vs-mock -->
+
+  <!-- workdocs:begin id=diagrams -->
+  <section id="diagrams">
+    <h2>Diagrams</h2>
+    <p>Three interactive views of the same code, drawn with Archify from the sources cited on each box (hover a box to see its file and lines). The architecture map is on the <a href="index.html#arch">Overview</a>.</p>
+    <h3>Sequence: create, confirm and send (live sandbox path)</h3>
+    <p>What the published demo video shows: the LLM drafts on PayPal, <code>send_invoice</code> only records a pending action, and the send runs after the click. In zero-key mode the demo agent and the in-memory store stand in for the LLM and PayPal.</p>
+    <figure class="wd-embed">
+      <iframe src="diagrams/sequence-create-send.html" title="Sequence diagram: create, confirm and send an invoice" loading="lazy" style="display:block;width:100%;height:760px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
+      <figcaption><a href="diagrams/sequence-create-send.html">Open full screen</a></figcaption>
+    </figure>
+    <h3>Workflow: one chat turn</h3>
+    <p>The two agent paths meet at the same human gate; execution then picks PayPal or the in-memory store.</p>
+    <figure class="wd-embed">
+      <iframe src="diagrams/workflow-main.html" title="Workflow diagram: one chat turn from request to execution" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
+      <figcaption><a href="diagrams/workflow-main.html">Open full screen</a></figcaption>
+    </figure>
+    <h3>Lifecycle: invoice status</h3>
+    <p>Every write waits in a pending state until confirmed; <code>PAID</code> is never set by the app.</p>
+    <figure class="wd-embed">
+      <iframe src="diagrams/lifecycle-invoice.html" title="Lifecycle diagram: invoice status transitions" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
+      <figcaption><a href="diagrams/lifecycle-invoice.html">Open full screen</a></figcaption>
+    </figure>
+    <p class="wd-source">Source: <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/mock-store.ts</code>, <code>src/lib/demo-agent.ts</code>. Diagram sources: <code>.archify/*/candidate.json</code>.</p>
+  </section>
+  <!-- workdocs:end id=diagrams -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh, 2026-11-07; sources: see the Source line under each section.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
 </body>
 </html>

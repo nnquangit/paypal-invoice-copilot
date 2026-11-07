@@ -4,7 +4,10 @@
  */
 import { formatInvoice } from "./paypal-tools";
 import * as mock from "./mock-store";
+import { createPendingAction } from "./pending";
 import type { PendingAction } from "./types";
+
+const LOCAL_NOTE = "_Built-in demo agent · local mock desk: no PayPal call, no email is sent._";
 
 export interface DemoAgentResult {
   text: string;
@@ -83,8 +86,12 @@ function findInvoiceRef(text: string) {
   return undefined;
 }
 
-export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
-  const text = userText.trim();
+export async function runDemoAgent(
+  userText: string,
+  opts: { owner: string }
+): Promise<DemoAgentResult> {
+  const { owner } = opts;
+  const text = userText.trim().slice(0, 4000);
   const lower = text.toLowerCase();
   if (/^(hi|hello|hey|yo)\b/.test(lower) || lower.includes("what can you")) {
     return {
@@ -97,7 +104,8 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
         "• `Remind Acme about their invoice`\n" +
         "• `Show QR for INV-1001`\n" +
         "• `Cancel invoice INV-1001`\n\n" +
-        "Send / remind / cancel always ask for your confirmation first.",
+        "Send / remind / cancel always ask for your confirmation first.\n\n" +
+        LOCAL_NOTE,
     };
   }
 
@@ -119,7 +127,7 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
         `• **Paid:** $${r.paid_total}\n` +
         `• **Drafts:** ${r.draft_count}\n\n` +
         (lines || "No outstanding invoices.") +
-        `\n\n_Running in demo mode — data is local mock PayPal invoices._`,
+        `\n\n${LOCAL_NOTE}`,
     };
   }
 
@@ -135,7 +143,8 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
     return {
       text:
         `Found **${total}** invoice(s)${status ? ` with status ${status}` : ""}:\n\n` +
-        (items.map(formatInvoice).join("\n\n") || "None yet."),
+        (items.map(formatInvoice).join("\n\n") || "None yet.") +
+        `\n\n${LOCAL_NOTE}`,
     };
   }
 
@@ -145,9 +154,10 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
     const qr = mock.generateQr(inv.id);
     return {
       text:
-        `QR ready for **${inv.invoice_number}**.\n` +
-        `Payment link: ${qr.href}\n\n` +
-        `![QR](${qr.data_url})`,
+        `**Placeholder** QR for **${inv.invoice_number}** — not a scannable code; ` +
+        `this app does not call PayPal's QR API.\n` +
+        `Payment link: ${qr.href || "none (local mock invoice has no PayPal page)"}\n\n` +
+        `![Placeholder QR](${qr.data_url})`,
     };
   }
 
@@ -156,16 +166,17 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
       findInvoiceRef(text) ||
       mock.listInvoices().items.find((i) => i.status === "SENT" || i.status === "UNPAID");
     if (!inv) return { text: "No unpaid invoice found to remind." };
-    const pending = mock.createPendingAction(
-      "send_invoice_reminder",
-      inv.id,
-      `Send reminder for ${inv.invoice_number} to ${inv.recipient_email}`
-    );
+    const pending = createPendingAction({
+      tool: "send_invoice_reminder",
+      invoice_id: inv.id,
+      summary: `Record a reminder for ${inv.invoice_number} to ${inv.recipient_email} — local mock desk, no email sent`,
+      owner,
+    });
     return {
       text:
         `I can remind **${inv.recipient_email}** about **${inv.invoice_number}** ` +
         `(${inv.amount.currency_code} ${inv.amount.value}).\n\n` +
-        `Please confirm in the card below before I contact them via PayPal.`,
+        `Confirm in the card below to record the reminder.\n\n${LOCAL_NOTE}`,
       pendingAction: pending,
     };
   }
@@ -173,13 +184,14 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
   if (/\bcancel\b/i.test(lower) && !(/invoice\b/i.test(lower) && extractMoney(text))) {
     const inv = findInvoiceRef(text);
     if (!inv) return { text: "Tell me which invoice to cancel (invoice number or recipient)." };
-    const pending = mock.createPendingAction(
-      "cancel_sent_invoice",
-      inv.id,
-      `Cancel invoice ${inv.invoice_number} for ${inv.recipient_email}`
-    );
+    const pending = createPendingAction({
+      tool: "cancel_sent_invoice",
+      invoice_id: inv.id,
+      summary: `Cancel invoice ${inv.invoice_number} for ${inv.recipient_email} — local mock desk`,
+      owner,
+    });
     return {
-      text: `Cancel **${inv.invoice_number}** for ${inv.recipient_email}? Confirm below.`,
+      text: `Cancel **${inv.invoice_number}** for ${inv.recipient_email}? Confirm below.\n\n${LOCAL_NOTE}`,
       pendingAction: pending,
     };
   }
@@ -189,13 +201,14 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
       findInvoiceRef(text) ||
       mock.listInvoices().items.find((i) => i.status === "DRAFT");
     if (!inv) return { text: "No draft invoice found to send. Create one first." };
-    const pending = mock.createPendingAction(
-      "send_invoice",
-      inv.id,
-      `Send invoice ${inv.invoice_number} (${inv.amount.currency_code} ${inv.amount.value}) to ${inv.recipient_email}`
-    );
+    const pending = createPendingAction({
+      tool: "send_invoice",
+      invoice_id: inv.id,
+      summary: `Mark ${inv.invoice_number} (${inv.amount.currency_code} ${inv.amount.value}) as sent to ${inv.recipient_email} — local mock desk, no email sent`,
+      owner,
+    });
     return {
-      text: `Ready to send **${inv.invoice_number}** to ${inv.recipient_email}. Confirm below.`,
+      text: `Ready to send **${inv.invoice_number}** to ${inv.recipient_email}. Confirm below.\n\n${LOCAL_NOTE}`,
       pendingAction: pending,
     };
   }
@@ -225,19 +238,20 @@ export async function runDemoAgent(userText: string): Promise<DemoAgentResult> {
       items: [{ name: service, quantity: 1, unit_price: amount }],
     });
 
-    const pending = mock.createPendingAction(
-      "send_invoice",
-      inv.id,
-      `Send invoice ${inv.invoice_number} (${inv.amount.currency_code} ${inv.amount.value}) to ${inv.recipient_email}`
-    );
+    const pending = createPendingAction({
+      tool: "send_invoice",
+      invoice_id: inv.id,
+      summary: `Mark ${inv.invoice_number} (${inv.amount.currency_code} ${inv.amount.value}) as sent to ${inv.recipient_email} — local mock desk, no email sent`,
+      owner,
+    });
 
     return {
       text:
-        `Draft created on PayPal (demo sandbox):\n\n${formatInvoice(inv)}\n\n` +
+        `Draft created in the **local mock desk** (no PayPal call):\n\n${formatInvoice(inv)}\n\n` +
         (remind
           ? `Noted: remind them in **${remind} days** if still unpaid.\n\n`
           : "") +
-        `Confirm below to **send** it to the client via PayPal.`,
+        `Confirm below to mark it **sent** in the local desk (no email is sent).`,
       pendingAction: pending,
     };
   }

@@ -1,7 +1,7 @@
 # Invoice Copilot explainer — English narration
 
 Composition: `InvoiceCopilotExplainer` · 1920×1080 · 30 fps  
-Voice: `en-US-AndrewNeural` (edge-tts) · one MP3 per scene under `public/audio/`  
+Voice: Kokoro-82M `af_heart` (Apache-2.0, generated locally with `scripts/kokoro-vo.py`) · one MP3 per scene under `public/audio/`, normalised to about −20 LUFS\
 Audience: PayPal AI Hackathon judges on Devpost
 
 Timing note: scene lengths are driven by measured VO duration + ~0.6–0.8s head/tail padding so animations finish cleanly. Total target **60–100s**.
@@ -39,18 +39,20 @@ Try demo mode in under a minute — no PayPal keys required. Open the chat and a
 `public/audio/bg-ambient.mp3` — locally synthesized ambient pad (ffmpeg), ~−20 dB under VO, fade in/out. Royalty-free (generated, not sampled).
 
 
-## Measured timings (edge-tts `en-US-AndrewNeural`)
+## Measured timings (Kokoro `af_heart`)
 
 | Scene | VO length | Scene length |
 |-------|-----------|--------------|
-| Title | 7.03s | 9.0s (270f) |
-| Problem | 8.98s | 11.0s (330f) |
-| Solution | 8.83s | 11.0s (330f) |
-| Flow | 9.55s | 12.0s (360f) |
-| Stack | 8.93s | 11.0s (330f) |
-| Outro | 6.84s | 11.0s (330f) |
-| **Total** | ~50.2s VO | **65.0s** (1950f) |
+| Title | 7.33s | 9.0s (270f) |
+| Problem | 9.47s | 11.0s (330f) |
+| Solution | 8.55s | 11.0s (330f) |
+| Flow | 9.65s | 12.0s (360f) |
+| Stack | 9.07s | 11.0s (330f) |
+| Outro | 6.70s | 11.0s (330f) |
+| **Total** | ~50.8s VO | **65.0s** (1950f) |
 
 VO lead-in: 0.6s per scene. BG: `bg-ambient.mp3` at volume 0.45 (~−20 dB vs VO).
 
-Burned-in captions: OFF (voiceover + bg music only; no hardsubs).
+Burned-in captions: OFF (voiceover + bg music only; no hardsubs). `src/captions-data.ts` still holds the old edge-tts word timings; it is unused while captions are off.
+
+History: the first published cut used Microsoft Edge read-aloud voices via edge-tts, which carry no licence for published audio. The voice was replaced on 2026-11-07 and the explainer re-rendered with Remotion (title badge now reads "PayPal AI Hackathon"). The Devpost demo reuses this render for 0:00–1:05, then the original "Live PayPal sandbox" card and screen recording unchanged.

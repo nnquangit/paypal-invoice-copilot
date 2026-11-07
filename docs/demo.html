@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Demo script · PayPal Invoice Copilot</title>
+  <meta name="generator" content="workdocs">
+  <meta name="description" content="A reproducible zero-key demo of PayPal Invoice Copilot: setup, script, fallbacks and an honest claims check.">
+  <link rel="stylesheet" href="assets/workdocs.css">
+  <script>try{var t=localStorage.getItem("docs-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<header class="wd-nav">
+  <nav class="wd-bar" aria-label="Documentation">
+    <a class="wd-name" href="index.html">Invoice Copilot docs</a>
+    <a class="wd-link" href="index.html">Overview</a>
+    <a class="wd-link" href="setup.html">Setup</a>
+    <a class="wd-link" href="how-it-works.html">How it works</a>
+    <a class="wd-link" href="security.html">Security</a>
+    <a class="wd-link" href="api.html">API</a>
+    <a class="wd-link" href="demo.html" aria-current="page">Demo script</a>
+    <a class="wd-link" href="workmap.html">Work map</a>
+  </nav>
+</header>
+<main>
+  <header class="wd-hero">
+    <div class="wd-eyebrow">PayPal Invoice Copilot</div>
+    <h1>Demo script</h1>
+    <p class="wd-lead">An optional live walkthrough of about 2½ minutes on the zero-key demo route (rule-based demo agent and in-memory mock store), with what to say about each mocked part. It is separate from the published demo video.</p>
+  </header>
+
+  <!-- workdocs:begin id=goal -->
+  <section id="goal">
+    <h2>Goal &amp; audience</h2>
+    <p>Show hackathon judges that one plain-English sentence becomes a structured invoice draft, and that send, remind and cancel wait for a click on the confirmation card. Target length about 2:30, presented live on the <strong>zero-key route</strong> (rule-based demo agent and in-memory mock store). The confirmation guarantee holds for that route; it is not a guarantee for the LLM route (see <a href="security.html#threats">Security</a>).</p>
+    <p><strong>Two different things.</strong> The published demo video below (about 1:53) is a recording of a <em>live</em> run: Groq tool calling, a real PayPal sandbox draft, a confirmed send and a sandbox payment link. The script on this page is a separate live walkthrough without keys; it is not a transcript of that video.</p>
+    <figure class="wd-video">
+      <video controls preload="metadata" poster="media/devpost-demo-poster.png" src="media/devpost-demo.mp4" width="1920" height="1080"><track kind="captions" srclang="en" label="English" src="media/devpost-demo.srt">Your browser cannot play this video. The steps below cover the same flow.</video>
+      <figcaption>Published Devpost demo, local copy (<code>docs/media/devpost-demo.mp4</code>; captions in <code>devpost-demo.srt</code>; public copy on <a href="https://www.youtube.com/watch?v=UIxG2XZMInI">YouTube</a>). Voice: Kokoro-82M <code>af_heart</code> (Apache-2.0); background music generated with ffmpeg. The 65-second explainer is <a href="media/invoice-copilot-explainer.mp4">media/invoice-copilot-explainer.mp4</a>.</figcaption>
+    </figure>
+    <p class="wd-source">Source: <code>docs/media/devpost-demo.srt</code>, <code>src/lib/demo-agent.ts</code>, <code>src/lib/paypal-tools.ts</code></p>
+  </section>
+  <!-- workdocs:end id=goal -->
+
+  <!-- workdocs:begin id=prereq -->
+  <section id="prereq">
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>A laptop with Node.js, npm and bash (<a href="setup.html#prereq">Setup → Prerequisites</a>), and the repo installed with <code>npm install</code> before the demo starts.</li>
+      <li>No accounts and no keys. Do not use someone else's PayPal or LLM account for the live variant.</li>
+      <li>A browser window at least 1280 px wide, so the chat and the invoice desk sit side by side.</li>
+      <li>Off screen: <code>.env.local</code>, terminals that print environment variables, password managers and private tabs.</li>
+    </ul>
+  </section>
+  <!-- workdocs:end id=prereq -->
+
+  <!-- workdocs:begin id=setup -->
+  <section id="setup">
+    <h2>Setup commands</h2>
+    <pre><code>cd paypal-invoice-copilot
+DEMO_MODE=true FORCE_DEMO_AGENT=true npm run dev     # open http://localhost:3000</code></pre>
+    <p>Both flags keep the run offline even if a <code>.env.local</code> with keys exists: <code>DEMO_MODE=true</code> turns off the PayPal and LLM checks in <code>src/lib/config.ts</code>, and <code>FORCE_DEMO_AGENT=true</code> selects the demo agent in <code>src/app/api/chat/route.ts</code>. Without any keys, plain <code>npm run dev</code> does the same.</p>
+    <p><strong>Ready when</strong> the header badges read "Demo mode", "PayPal: local mock (no PayPal calls)" and "LLM: built-in demo agent", and the desk shows two seeded invoices: <code>INV-1001</code> Acme Corp SENT USD 850.00 and <code>INV-1000</code> Northwind Labs PAID USD 1200.00. Restarting the server resets to this state.</p>
+    <p class="wd-source">Source: <code>src/lib/config.ts</code>, <code>src/app/api/chat/route.ts</code>, <code>src/lib/mock-store.ts:seed</code>, <code>src/components/ModeBadge.tsx</code></p>
+  </section>
+  <!-- workdocs:end id=setup -->
+
+  <!-- workdocs:begin id=script -->
+  <section id="script">
+    <h2>Script</h2>
+    <p>Each step: what to do, what to say, what the screen shows. The diagram walks through the steps on its own.</p>
+    <ol class="wd-steps" data-player data-lanes="you=Presenter|says and types;ui=Browser|chat + desk;app=App|demo agent + mock store">
+      <li data-from="you" data-to="ui" data-label="open the app"><b>0:00 The problem</b> — show the welcome message, the desk and the "Demo mode" badge. Say: "Freelancers bill clients from chat notes. Invoice Copilot turns the note into an invoice. This run uses the built-in demo agent and a local store, so it needs no keys."</li>
+      <li data-from="ui" data-to="app" data-label="Invoice Acme Corp $500…"><b>0:20 Create</b> — type <code>Invoice Acme Corp $500 for logo design, due in 14 days</code>. The reply reads "Draft created in the <strong>local mock desk</strong> (no PayPal call)" with <code>INV-1011</code> on a fresh start, and a "Human confirmation required" card whose summary ends "local mock desk, no email sent". Say: "It pulled out client, amount, service and due date, and created a draft. Nothing is sent yet."</li>
+      <li data-from="you" data-to="ui" data-label="Confirm"><b>0:50 Confirm the send</b> — click <strong>Confirm</strong>. The desk shows the invoice as SENT and the unpaid total grows. Say: "Sending waits for my click. In this mode 'sent' is a status change in the local store, not a PayPal email."</li>
+      <li data-from="ui" data-to="app" data-label="Who owes me money?"><b>1:10 Who owes what</b> — type <code>Who owes me money?</code>. The reply lists unpaid invoices, totals and drafts from the desk.</li>
+      <li data-from="ui" data-to="app" data-label="Show QR for INV-1001"><b>1:30 QR</b> — type <code>Show QR for INV-1001</code>. Say: "This QR is labelled PLACEHOLDER; a scannable PayPal QR is not wired up yet."</li>
+      <li data-from="ui" data-to="app" data-label="Remind Acme…"><b>1:45 Remind</b> — type <code>Remind Acme about their invoice</code>, then <strong>Confirm</strong>. The reply shows the reminder count. Say: "Remind uses the same confirmation card."</li>
+      <li data-from="ui" data-to="app" data-label="Cancel invoice INV-1011"><b>2:05 Cancel, safely</b> — type <code>Cancel invoice INV-1011</code>, show the card, then press <strong>Cancel</strong> on the card. Nothing changes on the desk.</li>
+      <li data-from="app" data-to="you" data-kind="ret" data-label="close on the desk"><b>2:20 Close</b> — end on the desk totals. Say: "With an LLM key and PayPal sandbox keys, create and list go through the official PayPal Agent Toolkit and confirmed actions call PayPal; that is the run in our video. Known gaps are in the Security doc."</li>
+    </ol>
+    <p class="wd-source">Source: <code>src/lib/demo-agent.ts</code> (intent order: greeting, summary, list, QR, remind, cancel, send, create), <code>src/components/ChatPanel.tsx</code> (<code>SUGGESTIONS</code>), <code>tests/mock-store.test.ts</code> (create → confirm send → remind → QR → cancel)</p>
+  </section>
+  <!-- workdocs:end id=script -->
+
+  <!-- workdocs:begin id=claims -->
+  <section id="claims">
+    <h2>Genuine vs simulated</h2>
+    <div class="wd-table"><table>
+      <thead><tr><th>Claim</th><th>Evidence</th><th>Say aloud</th></tr></thead>
+      <tbody>
+        <tr><td>Natural language → draft invoice</td><td><code>runDemoAgent</code> regex extraction; <code>tests/mock-store.test.ts</code></td><td>Demo agent is rule-based; the LLM path is optional</td></tr>
+        <tr><td>Send / remind / cancel need a human click</td><td>Tools only call <code>proposeAction</code>; no confirm tool exists; <code>/api/confirm</code> requires the same browser session; <code>tests/chat-llm.test.ts</code>, <code>tests/security.test.ts</code></td><td>Genuine in both paths. It is a per-browser session check, not a user login</td></tr>
+        <tr><td>Each confirmed action runs once</td><td><code>src/lib/pending.ts</code> claim; a second Confirm returns <code>already_executed</code> (checked on a local run)</td><td>Once per server process; not exactly-once across restarts</td></tr>
+        <tr><td>"Remind them in 3 days"</td><td>Stored only as note text (<code>Auto-remind planned…</code>); no scheduler in the code</td><td>Do not claim automatic reminders</td></tr>
+        <tr><td>Uses PayPal Agent Toolkit</td><td><code>getLiveToolkitTools</code>, <code>executePendingAction</code>, <code>/api/invoices</code></td><td>Only with sandbox keys, a local launch and a passing probe; not in the zero-key run</td></tr>
+        <tr><td>Payment QR</td><td><code>mock.generateQr</code> returns a graphic labelled PLACEHOLDER</td><td>Placeholder, in both modes</td></tr>
+        <tr><td>Tests pass</td><td><code>npm test</code>: 4 files, 73 tests passed on 2026-11-07, offline with a stubbed toolkit and a fake model</td><td>Say they are offline tests; the live sandbox path was checked by hand</td></tr>
+      </tbody>
+    </table></div>
+    <p class="wd-source">Source: <code>src/lib/demo-agent.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/pending.ts</code>, <code>src/lib/mock-store.ts</code>, <code>tests/*.test.ts</code></p>
+  </section>
+  <!-- workdocs:end id=claims -->
+
+  <!-- workdocs:begin id=fallback -->
+  <section id="fallback">
+    <h2>Fallbacks</h2>
+    <ul>
+      <li><strong>Something looks wrong, or a confirm fails</strong> → stop and restart the dev server; the in-memory store reseeds.</li>
+      <li><strong>"I didn't catch that."</strong> → use the suggestion chips; the demo agent only knows fixed phrasings.</li>
+      <li><strong>Invoice number differs from <code>INV-1011</code></strong> (the server was not fresh) → read the number from the reply and use it in the cancel step.</li>
+      <li><strong>Server does not start</strong> → check <a href="setup.html#trouble">Setup → Troubleshooting</a>; if it cannot be fixed in a minute, switch to the video.</li>
+      <li><strong>No working machine</strong> → play the published video above and say it is the recorded live sandbox run, not this walkthrough.</li>
+    </ul>
+  </section>
+  <!-- workdocs:end id=fallback -->
+
+  <!-- workdocs:begin id=cleanup -->
+  <section id="cleanup">
+    <h2>Cleanup</h2>
+    <ul>
+      <li>Stop the dev server you started (<kbd>Ctrl</kbd>+<kbd>C</kbd> in its terminal). All demo invoices and pending actions live in memory and disappear with it; there is nothing else to reset.</li>
+      <li>Close the app tab. No files are downloaded or written by the demo.</li>
+    </ul>
+  </section>
+  <!-- workdocs:end id=cleanup -->
+
+  <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh, 2026-11-07; sources: see the Source line under each section.</footer>
+</main>
+<script src="assets/workdocs.js" defer></script>
+</body>
+</html>

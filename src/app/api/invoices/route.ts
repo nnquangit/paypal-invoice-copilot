@@ -1,57 +1,53 @@
 import { NextResponse } from "next/server";
 import { isPayPalConfigured } from "@/lib/config";
+import { guardRequest } from "@/lib/access";
+import { logServerError, publicPayPalError } from "@/lib/errors";
 import * as mock from "@/lib/mock-store";
-import { normalizeInvoiceList } from "@/lib/paypal-tools";
+import { listLiveInvoices } from "@/lib/paypal-tools";
 
 export const runtime = "nodejs";
 
+function intParam(v: string | null, def: number, min: number, max: number): number {
+  const n = Math.floor(Number(v ?? def));
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
+}
+
 export async function GET(req: Request) {
+  const blocked = guardRequest(req, { mutation: false });
+  if (blocked) return blocked;
+
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status") || undefined;
-  const page = Number(searchParams.get("page") || 1);
-  const page_size = Number(searchParams.get("page_size") || 50);
+  const status = searchParams.get("status")?.slice(0, 30) || undefined;
+  const page = intParam(searchParams.get("page"), 1, 1, 1000);
+  const page_size = intParam(searchParams.get("page_size"), 50, 1, 100);
 
   if (isPayPalConfigured()) {
     try {
-      const { PayPalAgentToolkit } = await import("@paypal/agent-toolkit/ai-sdk");
-      const toolkit = new PayPalAgentToolkit({
-        clientId: process.env.PAYPAL_CLIENT_ID!,
-        clientSecret: process.env.PAYPAL_CLIENT_SECRET!,
-        configuration: {
-          actions: { invoices: { list: true } },
-          context: {
-            sandbox: (process.env.PAYPAL_ENVIRONMENT || "sandbox") !== "live",
-          },
-        },
+      let items = await listLiveInvoices({ page, page_size });
+      if (status) items = items.filter((i) => i.status === status);
+      return NextResponse.json({
+        source: "paypal-sandbox",
+        total: items.length,
+        items,
+        summary: mock.summarizeInvoices(items),
+        status,
       });
-      const tools = toolkit.getTools();
-      const listTool = tools.list_invoices as {
-        execute?: (a: unknown, o: unknown) => Promise<unknown>;
-      };
-      if (listTool?.execute) {
-        const result = await listTool.execute(
-          { page, page_size, total_required: true },
-          { toolCallId: "api-list", messages: [] }
-        );
-        const normalized = normalizeInvoiceList({ source: "paypal", result });
-        return NextResponse.json({
-          source: normalized.source,
-          total: normalized.items.length,
-          items: normalized.items,
-          summary: normalized.summary,
-          status,
-          raw_error:
-            normalized.source.startsWith("mock") && typeof result === "string"
-              ? result.slice(0, 300)
-              : undefined,
-        });
-      }
     } catch (err) {
-      console.error("live list failed, using mock", err);
+      logServerError("PayPal sandbox list failed:", err);
+      // No silent fallback to mock rows: report the failure.
+      return NextResponse.json(
+        {
+          source: "paypal-sandbox",
+          error: `PayPal sandbox list failed: ${publicPayPalError(err)}`,
+          total: 0,
+          items: [],
+          summary: null,
+        },
+        { status: 502 }
+      );
     }
   }
 
   const { items, total } = mock.listInvoices({ page, page_size, status });
-  const summary = mock.summarizeOutstanding();
-  return NextResponse.json({ source: "mock", total, items, summary });
+  return NextResponse.json({ source: "local-mock", total, items, summary: mock.summarizeOutstanding() });
 }

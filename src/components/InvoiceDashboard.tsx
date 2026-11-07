@@ -8,7 +8,11 @@ export function InvoiceDashboard({
   summary,
   loading,
   onRefresh,
+  source,
+  error,
 }: {
+  source?: string;
+  error?: string;
   invoices: Invoice[];
   summary?: {
     unpaid_count: number;
@@ -24,7 +28,13 @@ export function InvoiceDashboard({
       <div className="flex items-center justify-between border-b border-[var(--pp-border)] px-5 py-4">
         <div>
           <h2 className="text-sm font-semibold text-[var(--pp-navy)]">Invoice desk</h2>
-          <p className="text-xs text-[var(--pp-muted)]">Live view of PayPal invoices</p>
+          <p className="text-xs text-[var(--pp-muted)]">
+            {source === "paypal-sandbox"
+              ? "Source: PayPal sandbox"
+              : source === "local-mock"
+                ? "Source: local mock desk (not PayPal)"
+                : "Source: unknown"}
+          </p>
         </div>
         <button
           onClick={onRefresh}
@@ -33,6 +43,12 @@ export function InvoiceDashboard({
           {loading ? "…" : "Refresh"}
         </button>
       </div>
+
+      {error && (
+        <div role="alert" className="border-b border-rose-200 bg-rose-50 px-5 py-2 text-xs text-rose-800">
+          {error}
+        </div>
+      )}
 
       {summary && (
         <div className="grid grid-cols-2 gap-2 border-b border-[var(--pp-border)] p-4">
