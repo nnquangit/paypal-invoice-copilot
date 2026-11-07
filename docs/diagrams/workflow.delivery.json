@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "60add4b3-bb4f-46eb-a70e-a066070f48f0",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/src/workflow.json",
+  "output": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/workflow.html",
+  "specification": {
+    "sha256": "15bc2684d1a68deb6242ec29f76c67bda9ef28118542933fe6486836b7fcad75",
+    "bytes": 7212
+  },
+  "artifact": {
+    "sha256": "75f648b1374aa0eb02edc0480ea4bc61d638c49c6745d88346f31944e64e4ce1",
+    "bytes": 764916
+  }
+}

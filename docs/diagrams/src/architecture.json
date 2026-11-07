@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Invoice Copilot architecture",
+    "output": "docs/diagrams/architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github-paypal:nnquangit/paypal-invoice-copilot.git",
+      "revision": "52161a509b2689c3c3af61da91871be194ff35ea",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "freelancer",
+      "type": "external",
+      "label": "Freelancer",
+      "sublabel": "plain-English request",
+      "pos": [
+        40,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/components/ChatPanel.tsx",
+          "line": 14,
+          "end_line": 20,
+          "label": "suggestion chips"
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Browser UI",
+      "sublabel": "ChatPanel \u00b7 ConfirmCard \u00b7 desk",
+      "pos": [
+        290,
+        290
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/components/ChatPanel.tsx",
+          "line": 85,
+          "end_line": 195
+        },
+        {
+          "path": "src/components/AppShell.tsx",
+          "line": 22,
+          "end_line": 35
+        },
+        {
+          "path": "src/components/ConfirmCard.tsx",
+          "line": 5,
+          "end_line": 53
+        }
+      ]
+    },
+    {
+      "id": "desk_routes",
+      "type": "backend",
+      "label": "Desk + health",
+      "sublabel": "/api/invoices \u00b7 /api/health",
+      "pos": [
+        290,
+        110
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/invoices/route.ts",
+          "line": 15,
+          "end_line": 53
+        },
+        {
+          "path": "src/app/api/health/route.ts",
+          "line": 8,
+          "end_line": 34
+        }
+      ]
+    },
+    {
+      "id": "api_chat",
+      "type": "backend",
+      "label": "/api/chat",
+      "sublabel": "guard \u00b7 picks the agent",
+      "pos": [
+        560,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/chat/route.ts",
+          "line": 23,
+          "end_line": 130
+        },
+        {
+          "path": "src/lib/access.ts",
+          "line": 75,
+          "end_line": 94,
+          "label": "guardRequest"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "OpenAI-compatible LLM",
+      "sublabel": "Groq by default",
+      "pos": [
+        560,
+        110
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/llm.ts",
+          "line": 13,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "demo_agent",
+      "type": "backend",
+      "label": "Demo agent",
+      "sublabel": "regex intents, zero keys",
+      "pos": [
+        560,
+        470
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/demo-agent.ts",
+          "line": 89,
+          "end_line": 273
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Invoice tools",
+      "sublabel": "paypal-tools.ts",
+      "pos": [
+        810,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "propose only",
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 251,
+          "end_line": 365,
+          "label": "proposeAction + tools"
+        },
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 574,
+          "end_line": 709,
+          "label": "getInvoiceTools"
+        }
+      ]
+    },
+    {
+      "id": "mock_store",
+      "type": "database",
+      "label": "In-memory state",
+      "sublabel": "invoices \u00b7 pending actions",
+      "pos": [
+        810,
+        470
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 10,
+          "end_line": 22
+        },
+        {
+          "path": "src/lib/pending.ts",
+          "line": 43,
+          "end_line": 91,
+          "label": "owner + TTL"
+        }
+      ]
+    },
+    {
+      "id": "api_confirm",
+      "type": "security",
+      "label": "/api/confirm",
+      "sublabel": "same browser session",
+      "pos": [
+        290,
+        650
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "tag": "human gate",
+      "sources": [
+        {
+          "path": "src/app/api/confirm/route.ts",
+          "line": 24,
+          "end_line": 63
+        }
+      ]
+    },
+    {
+      "id": "executor",
+      "type": "backend",
+      "label": "executePendingAction",
+      "sublabel": "claim once, by provenance",
+      "pos": [
+        810,
+        650
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 501,
+          "end_line": 562
+        },
+        {
+          "path": "src/lib/pending.ts",
+          "line": 157,
+          "end_line": 172,
+          "label": "claimPendingAction"
+        }
+      ]
+    },
+    {
+      "id": "toolkit",
+      "type": "backend",
+      "label": "PayPal Agent Toolkit",
+      "sublabel": "@paypal/agent-toolkit",
+      "pos": [
+        1060,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 89,
+          "end_line": 104,
+          "label": "getLiveToolkitTools"
+        },
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 176,
+          "end_line": 197,
+          "label": "cached probe"
+        }
+      ]
+    },
+    {
+      "id": "paypal",
+      "type": "cloud",
+      "label": "PayPal Invoicing v2",
+      "sublabel": "sandbox only",
+      "pos": [
+        1310,
+        290
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 50,
+          "end_line": 56,
+          "label": "sandbox: true"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "types",
+      "from": "freelancer",
+      "to": "ui",
+      "label": "chat",
+      "variant": "emphasis"
+    },
+    {
+      "id": "post-chat",
+      "from": "ui",
+      "to": "api_chat",
+      "label": "POST",
+      "variant": "emphasis"
+    },
+    {
+      "id": "llm-call",
+      "from": "api_chat",
+      "to": "llm",
+      "label": "generateText"
+    },
+    {
+      "id": "demo-branch",
+      "from": "api_chat",
+      "to": "demo_agent",
+      "label": "no LLM key",
+      "variant": "dashed"
+    },
+    {
+      "id": "tool-calls",
+      "from": "api_chat",
+      "to": "tools",
+      "label": "tool calls",
+      "variant": "emphasis"
+    },
+    {
+      "id": "demo-writes",
+      "from": "demo_agent",
+      "to": "mock_store",
+      "label": "draft + proposal"
+    },
+    {
+      "id": "tools-mock",
+      "from": "tools",
+      "to": "mock_store",
+      "label": "local rows + proposals",
+      "variant": "dashed"
+    },
+    {
+      "id": "tools-live",
+      "from": "tools",
+      "to": "toolkit",
+      "label": "probe ok"
+    },
+    {
+      "id": "toolkit-paypal",
+      "from": "toolkit",
+      "to": "paypal",
+      "label": "REST",
+      "variant": "emphasis"
+    },
+    {
+      "id": "confirm-click",
+      "from": "ui",
+      "to": "api_confirm",
+      "label": "Confirm",
+      "variant": "security"
+    },
+    {
+      "id": "confirm-exec",
+      "from": "api_confirm",
+      "to": "executor",
+      "label": "Confirm, owner check",
+      "variant": "security"
+    },
+    {
+      "id": "exec-mock",
+      "from": "executor",
+      "to": "mock_store",
+      "label": "local rows"
+    },
+    {
+      "id": "exec-live",
+      "from": "executor",
+      "to": "toolkit",
+      "label": "PayPal rows",
+      "variant": "dashed"
+    },
+    {
+      "id": "desk-load",
+      "from": "ui",
+      "to": "desk_routes",
+      "label": "load desk"
+    },
+    {
+      "id": "desk-live",
+      "from": "desk_routes",
+      "to": "toolkit",
+      "label": "list + probe",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          375,
+          60
+        ],
+        [
+          1135,
+          60
+        ]
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Default: zero keys",
+      "items": [
+        "Demo agent + in-memory state",
+        "Nothing reaches PayPal or an LLM",
+        "State resets on restart"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Live: local and sandbox only",
+      "items": [
+        "Credentials honoured only on a loopback bind (scripts/serve.sh), never on Vercel/Render",
+        "Toolkit used when both PayPal keys are set and the cached Invoicing probe passes; errors are reported, not replaced by mock rows"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Human gate",
+      "items": [
+        "Send, remind and cancel only create a pending action (owner = session cookie, 15 min)",
+        "No LLM tool can confirm; /api/confirm runs it once per process",
+        "Every route: same-origin JSON, loopback-only while live"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "schema_version": 2,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Invoice status lifecycle",
+    "output": "docs/diagrams/lifecycle.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github-paypal:nnquangit/paypal-invoice-copilot.git",
+      "revision": "52161a509b2689c3c3af61da91871be194ff35ea",
+      "link_mode": "local-only"
+    }
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "Invoice status"
+    },
+    {
+      "id": "waiting",
+      "label": "Awaiting human confirmation"
+    },
+    {
+      "id": "terminal",
+      "label": "Terminal"
+    }
+  ],
+  "states": [
+    {
+      "id": "draft",
+      "type": "start",
+      "label": "Draft",
+      "sublabel": "create_invoice",
+      "lane": "main",
+      "col": 0,
+      "step": "01",
+      "tag": "DRAFT",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 139,
+          "end_line": 186
+        }
+      ]
+    },
+    {
+      "id": "send_pending",
+      "type": "waiting",
+      "label": "Send pending",
+      "sublabel": "needs_confirmation",
+      "lane": "waiting",
+      "col": 1,
+      "step": "02",
+      "tag": "pending action",
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 251,
+          "end_line": 274
+        }
+      ]
+    },
+    {
+      "id": "sent",
+      "type": "active",
+      "label": "Sent",
+      "sublabel": "unpaid on the desk",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "SENT",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 219,
+          "end_line": 228
+        }
+      ]
+    },
+    {
+      "id": "cancel_pending",
+      "type": "waiting",
+      "label": "Cancel pending",
+      "sublabel": "cancel_sent_invoice",
+      "lane": "waiting",
+      "col": 2,
+      "tag": "pending action",
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 251,
+          "end_line": 274
+        }
+      ]
+    },
+    {
+      "id": "remind_pending",
+      "type": "waiting",
+      "label": "Reminder pending",
+      "sublabel": "send_invoice_reminder",
+      "lane": "waiting",
+      "col": 3,
+      "tag": "pending action",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 230,
+          "end_line": 239
+        }
+      ]
+    },
+    {
+      "id": "paid",
+      "type": "success",
+      "label": "Paid",
+      "sublabel": "recorded by PayPal",
+      "lane": "main",
+      "col": 4,
+      "step": "04",
+      "tag": "read-only",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 296,
+          "end_line": 318
+        }
+      ]
+    },
+    {
+      "id": "cancelled",
+      "type": "failure",
+      "label": "Cancelled",
+      "sublabel": "cancelInvoice",
+      "lane": "terminal",
+      "col": 2,
+      "tag": "CANCELLED",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 241,
+          "end_line": 250
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from": "draft",
+      "to": "send_pending",
+      "label": "send_invoice"
+    },
+    {
+      "from": "send_pending",
+      "to": "sent",
+      "label": "Confirm",
+      "variant": "emphasis"
+    },
+    {
+      "from": "send_pending",
+      "to": "draft",
+      "label": "Cancel on card",
+      "variant": "dashed"
+    },
+    {
+      "from": "sent",
+      "to": "cancel_pending",
+      "label": "cancel",
+      "variant": "security"
+    },
+    {
+      "from": "cancel_pending",
+      "to": "cancelled",
+      "label": "Confirm",
+      "variant": "security"
+    },
+    {
+      "from": "sent",
+      "to": "remind_pending",
+      "label": "remind"
+    },
+    {
+      "from": "remind_pending",
+      "to": "sent",
+      "label": "Confirm: count +1"
+    },
+    {
+      "from": "sent",
+      "to": "paid",
+      "label": "client pays",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Wait states",
+      "items": [
+        "Each write first becomes a pending action owned by the browser session, valid 15 minutes",
+        "Confirm executes it once; Cancel on the card leaves the status unchanged",
+        "An unknown PayPal outcome is terminal: check the dashboard before proposing again"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Who changes status",
+      "items": [
+        "Local rows: mock-store sendInvoice / remindInvoice / cancelInvoice",
+        "PayPal rows: the sandbox toolkit, then the desk row is refreshed",
+        "Paid is never set by the app; it comes from PayPal (or the seed data)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Guards in code",
+      "items": [
+        "Send only from DRAFT or SCHEDULED",
+        "Remind only from SENT, UNPAID or PARTIALLY_PAID",
+        "Cancel from any status except PAID or CANCELLED (drafts too)"
+      ]
+    }
+  ]
+}

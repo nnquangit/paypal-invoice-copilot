@@ -20,7 +20,7 @@ Workmap: Epic → Feature → Task → Subtask. Update with scripts/workmap.py a
     - [x] `T8` Workdocs five pages (2026-11-07) — owner: claude-opus-5-5 · 5 pages + workdocs.css/js, inline SVG arch+sequence (archify CLI denied); static QA ok; browser QA unverified (playwright-cli denied)
     - [x] `T9` Judge review revision (2026-11-07) — owner: claude-opus-5-5 · 5 review points applied; link+anchor checks rerun; marker/secret recheck denied, not rerun; browser QA unverified
     - [x] `T29` Six-page static refresh @claude-opus-5-5 (2026-11-07) — 6 static pages (setup.html new), animated flow + step players, local demo video, gallery image; static + browser QA (light/dark, 375px, console, nav); reduced-motion not checked
-    - [x] `T32` Architecture diagrams @claude-opus-5-5 (2026-11-07) — 4 Archify diagrams in docs/diagrams (all finalize gates pass), embedded on Overview + How it works; sources in .archify/
+    - [x] `T32` Architecture diagrams @claude-opus-5-5 (2026-11-07) — regenerated 2026-11-07 against 52161a5: architecture, workflow, lifecycle, sequence-create-send; sources in docs/diagrams/src
   - `P8` Submission cleanup
     - [x] `T27` Stray file removal @claude-opus-5-5 (2026-11-07) — removed agent logs, Qoder/source notes, root media duplicates, .archify, public/ boilerplate, legacy docs.css/js, setup.md, DEMO_SCRIPT.md; gallery → docs/media/gallery
     - [x] `T28` Workmap format upgrade @claude-opus-5-5 (2026-11-07) — json → workmap.md with stable ids; CLI + template from workmap skill
@@ -57,4 +57,6 @@ Workmap: Epic → Feature → Task → Subtask. Update with scripts/workmap.py a
     - [=] `T37` Recorder unlink scope @claude-opus-5-5-fix (2026-11-07) — record-live-demo.mjs: mkdtemp scratch + own output file only, env RECORD_OUT_DIR/APP_URL. Not executed (would hit live app)
     - [x] `T38` Security docs update @claude-opus-5-5-fix (2026-11-07) — README, SUBMISSION Security & limits, docs/security/setup/api.html updated to new behaviour; backups in .agent-reports/doc-backups-code-fixes
   - `P10` Submission update
-    - [>] `T39` Verify and test fixes @claude-opus-5-5 (2026-11-07) — TASK-UPDATE-SUBMISSION.md §1
+    - [x] `T39` Verify and test fixes @claude-opus-5-5 (2026-11-07) — npm ci; npm test 73/73 (4 files, offline); tsc clean after a test type fix; next build ok; zero-key runtime checks; docs + SUBMISSION aligned
+    - [>] `T40` Commit and push @claude-opus-5-5 (2026-11-07)
+    - [ ] `T41` Devpost entry update @claude-opus-5-5 (2026-11-07) — needs Chrome review + your approval

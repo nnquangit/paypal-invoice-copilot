@@ -87,6 +87,30 @@
   </section>
   <!-- workdocs:end id=steps -->
 
+  <!-- workdocs:begin id=process -->
+  <section id="process">
+    <h2>Process</h2>
+    <p>One chat turn in lanes: the request passes the guard, the LLM path or the zero-key demo agent drafts the invoice, both stop at a pending action owned by the browser session, and only a Confirm from that session reaches the executor, which sends PayPal rows to the sandbox toolkit and changes local rows in memory. Cancel on the card drops the action.</p>
+    <figure class="wd-frame">
+      <iframe src="diagrams/workflow.html" title="Workflow diagram: one chat turn through the agent choice, the human gate and execution" loading="lazy" style="aspect-ratio: 1077 / 702"></iframe>
+      <figcaption>Lanes: browser and PayPal, server, human gate, execution, zero-key path. <a href="diagrams/workflow.html" target="_blank" rel="noopener">Open full screen ↗</a> · drawn from <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, source <code>docs/diagrams/src/workflow.json</code></figcaption>
+    </figure>
+    <p class="wd-source">Source: <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/pending.ts</code>, <code>src/lib/demo-agent.ts</code></p>
+  </section>
+  <!-- workdocs:end id=process -->
+
+  <!-- workdocs:begin id=states -->
+  <section id="states">
+    <h2>States</h2>
+    <p>An invoice starts as <code>DRAFT</code>. Send, remind and cancel each wait in a pending state until the same browser confirms; Confirm moves it to <code>SENT</code>, counts a reminder, or <code>CANCELLED</code>. Cancel on the card leaves the status unchanged. <code>PAID</code> is never set by the app; it comes from PayPal or the seed data. Guards in code: send only from <code>DRAFT</code>/<code>SCHEDULED</code>, remind only from <code>SENT</code>/<code>UNPAID</code>/<code>PARTIALLY_PAID</code>, cancel from anything but <code>PAID</code>/<code>CANCELLED</code>.</p>
+    <figure class="wd-frame">
+      <iframe src="diagrams/lifecycle.html" title="Lifecycle diagram: invoice status from draft through pending confirmations to sent, paid or cancelled" loading="lazy" style="aspect-ratio: 1076 / 638"></iframe>
+      <figcaption>Wait states are pending actions (owner, 15 minutes). <a href="diagrams/lifecycle.html" target="_blank" rel="noopener">Open full screen ↗</a> · drawn from <code>src/lib/mock-store.ts</code>, <code>src/lib/paypal-tools.ts</code>, source <code>docs/diagrams/src/lifecycle.json</code></figcaption>
+    </figure>
+    <p class="wd-source">Source: <code>src/lib/mock-store.ts</code> (<code>sendInvoice</code>, <code>remindInvoice</code>, <code>cancelInvoice</code>), <code>src/lib/paypal-tools.ts</code> (<code>proposeAction</code>), <code>src/lib/pending.ts</code></p>
+  </section>
+  <!-- workdocs:end id=states -->
+
   <!-- workdocs:begin id=components -->
   <section id="components">
     <h2>Key components</h2>
@@ -139,32 +163,6 @@
     <p class="wd-source">Source: <code>src/lib/paypal-tools.ts</code>, <code>src/lib/llm.ts</code>, <code>tests/*.test.ts</code>, <code>docs/media/devpost-demo.srt</code></p>
   </section>
   <!-- workdocs:end id=real-vs-mock -->
-
-  <!-- workdocs:begin id=diagrams -->
-  <section id="diagrams">
-    <h2>Diagrams</h2>
-    <p>Three interactive views of the same code, drawn with Archify from the sources cited on each box (hover a box to see its file and lines). The architecture map is on the <a href="index.html#arch">Overview</a>.</p>
-    <h3>Sequence: create, confirm and send (live sandbox path)</h3>
-    <p>What the published demo video shows: the LLM drafts on PayPal, <code>send_invoice</code> only records a pending action, and the send runs after the click. In zero-key mode the demo agent and the in-memory store stand in for the LLM and PayPal.</p>
-    <figure class="wd-embed">
-      <iframe src="diagrams/sequence-create-send.html" title="Sequence diagram: create, confirm and send an invoice" loading="lazy" style="display:block;width:100%;height:760px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
-      <figcaption><a href="diagrams/sequence-create-send.html">Open full screen</a></figcaption>
-    </figure>
-    <h3>Workflow: one chat turn</h3>
-    <p>The two agent paths meet at the same human gate; execution then picks PayPal or the in-memory store.</p>
-    <figure class="wd-embed">
-      <iframe src="diagrams/workflow-main.html" title="Workflow diagram: one chat turn from request to execution" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
-      <figcaption><a href="diagrams/workflow-main.html">Open full screen</a></figcaption>
-    </figure>
-    <h3>Lifecycle: invoice status</h3>
-    <p>Every write waits in a pending state until confirmed; <code>PAID</code> is never set by the app.</p>
-    <figure class="wd-embed">
-      <iframe src="diagrams/lifecycle-invoice.html" title="Lifecycle diagram: invoice status transitions" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
-      <figcaption><a href="diagrams/lifecycle-invoice.html">Open full screen</a></figcaption>
-    </figure>
-    <p class="wd-source">Source: <code>src/app/api/chat/route.ts</code>, <code>src/app/api/confirm/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/mock-store.ts</code>, <code>src/lib/demo-agent.ts</code>. Diagram sources: <code>.archify/*/candidate.json</code>.</p>
-  </section>
-  <!-- workdocs:end id=diagrams -->
 
   <footer class="wd-foot">Written from commit 331e84a plus the uncommitted docs refresh, 2026-11-07; sources: see the Source line under each section.</footer>
 </main>

@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Create, confirm and send an invoice (live sandbox path)",
+    "output": "docs/diagrams/sequence-create-send.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "column_fit": "spread",
+    "repository": {
+      "url": "git@github-paypal:nnquangit/paypal-invoice-copilot.git",
+      "revision": "52161a509b2689c3c3af61da91871be194ff35ea",
+      "link_mode": "local-only"
+    },
+    "viewBox": [
+      1080,
+      680
+    ]
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Freelancer",
+      "sublabel": "browser"
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "ChatPanel",
+      "sublabel": "browser UI",
+      "sources": [
+        {
+          "path": "src/components/ChatPanel.tsx",
+          "line": 85,
+          "end_line": 195
+        }
+      ]
+    },
+    {
+      "id": "chat",
+      "type": "backend",
+      "label": "/api/chat",
+      "sublabel": "agent route",
+      "sources": [
+        {
+          "path": "src/app/api/chat/route.ts",
+          "line": 23,
+          "end_line": 130
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "LLM",
+      "sublabel": "tool calling",
+      "sources": [
+        {
+          "path": "src/lib/llm.ts",
+          "line": 13,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Invoice tools",
+      "sublabel": "paypal-tools",
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 574,
+          "end_line": 709
+        },
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 251,
+          "end_line": 274,
+          "label": "proposeAction"
+        }
+      ]
+    },
+    {
+      "id": "confirm",
+      "type": "security",
+      "label": "/api/confirm",
+      "sublabel": "executes",
+      "sources": [
+        {
+          "path": "src/app/api/confirm/route.ts",
+          "line": 24,
+          "end_line": 63
+        },
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 501,
+          "end_line": 562
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Store",
+      "sublabel": "desk",
+      "sources": [
+        {
+          "path": "src/lib/mock-store.ts",
+          "line": 188,
+          "end_line": 193
+        },
+        {
+          "path": "src/lib/pending.ts",
+          "line": 67,
+          "end_line": 91
+        }
+      ]
+    },
+    {
+      "id": "paypal",
+      "type": "cloud",
+      "label": "PayPal",
+      "sublabel": "sandbox",
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 403,
+          "end_line": 492
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 289,
+      "label": "Draft"
+    },
+    {
+      "from": 293,
+      "to": 401,
+      "label": "Propose, do not act"
+    },
+    {
+      "from": 405,
+      "to": 569,
+      "label": "Confirm and send"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m-post",
+      "from": "ui",
+      "to": "chat",
+      "y": 165,
+      "label": "POST {messages}",
+      "variant": "emphasis",
+      "note": "guard: same-origin JSON, loopback; sets the ic_sid cookie"
+    },
+    {
+      "id": "m-gen",
+      "from": "chat",
+      "to": "llm",
+      "y": 193,
+      "label": "generateText \u2192 tool call"
+    },
+    {
+      "id": "m-create",
+      "from": "chat",
+      "to": "tools",
+      "y": 221,
+      "label": "create_invoice"
+    },
+    {
+      "id": "m-pp-create",
+      "from": "tools",
+      "to": "paypal",
+      "y": 249,
+      "label": "create + get \u2192 DRAFT",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m-upsert",
+      "from": "tools",
+      "to": "store",
+      "y": 277,
+      "label": "upsertLiveInvoice",
+      "variant": "dashed"
+    },
+    {
+      "id": "m-send",
+      "from": "chat",
+      "to": "tools",
+      "y": 305,
+      "label": "send_invoice",
+      "note": "LLM call, or auto-queue-send"
+    },
+    {
+      "id": "m-pending",
+      "from": "tools",
+      "to": "store",
+      "y": 333,
+      "label": "createPendingAction (owner)",
+      "variant": "security"
+    },
+    {
+      "id": "m-needs",
+      "from": "tools",
+      "to": "chat",
+      "y": 361,
+      "label": "needs_confirmation",
+      "variant": "return"
+    },
+    {
+      "id": "m-card",
+      "from": "chat",
+      "to": "ui",
+      "y": 389,
+      "label": "text + pendingAction",
+      "variant": "return"
+    },
+    {
+      "id": "m-click",
+      "from": "user",
+      "to": "ui",
+      "y": 417,
+      "label": "click Confirm",
+      "variant": "security"
+    },
+    {
+      "id": "m-confirm",
+      "from": "ui",
+      "to": "confirm",
+      "y": 445,
+      "label": "POST id + cookie",
+      "variant": "security"
+    },
+    {
+      "id": "m-consume",
+      "from": "confirm",
+      "to": "store",
+      "y": 473,
+      "label": "claim once (owner, TTL)"
+    },
+    {
+      "id": "m-pp-send",
+      "from": "confirm",
+      "to": "paypal",
+      "y": 501,
+      "label": "probe + send_invoice",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m-pp-sent",
+      "from": "paypal",
+      "to": "confirm",
+      "y": 529,
+      "label": "SENT + payer link",
+      "variant": "return"
+    },
+    {
+      "id": "m-result",
+      "from": "confirm",
+      "to": "ui",
+      "y": 557,
+      "label": "{status: sent, href}",
+      "variant": "return",
+      "note": "desk row marked SENT first (markInvoiceStatus)"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "chat",
+      "from": 165,
+      "to": 389,
+      "type": "backend"
+    },
+    {
+      "participant": "tools",
+      "from": 221,
+      "to": 361,
+      "type": "backend"
+    },
+    {
+      "participant": "confirm",
+      "from": 445,
+      "to": 557,
+      "type": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Live path only",
+      "items": [
+        "Shown with PayPal sandbox keys, a local launch, a passing probe and an LLM key",
+        "Zero-key mode: the demo agent writes the draft and the proposal to memory; Confirm changes status in memory"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Human gate",
+      "items": [
+        "send_invoice only proposes; the model has no confirm tool",
+        "Only /api/confirm from the same browser session executes, once per process"
+      ]
+    }
+  ]
+}

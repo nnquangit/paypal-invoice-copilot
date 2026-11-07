@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 3.0.1">
   <meta name="archify-reader-contract" content="declared-wide-v1">
-  <title>Invoice lifecycle Diagram</title>
+  <title>Invoice status lifecycle Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4978,19 +4978,18 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
            data-preset-badge-blueprint="BLUEPRINT / REV 01"
            data-preset-badge-editorial="EDITORIAL / FIELD NOTE">
         <div class="pulse-dot"></div>
-        <h1>Invoice lifecycle</h1>
+        <h1>Invoice status lifecycle</h1>
       </div>
-      <p class="subtitle">DRAFT → SENT → PAID / CANCELLED + reminders</p>
     </div>
 
-
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"git@github-paypal:nnquangit/paypal-invoice-copilot.git","revision":"52161a509b2689c3c3af61da91871be194ff35ea","shortRevision":"52161a5","label":"github-paypal:nnquangit/paypal-invoice-copilot.git","linkMode":"local-only"},"referenceCount":7,"nodes":{"draft":[{"path":"src/lib/mock-store.ts","line":139,"endLine":186}],"send_pending":[{"path":"src/lib/paypal-tools.ts","line":251,"endLine":274}],"sent":[{"path":"src/lib/mock-store.ts","line":219,"endLine":228}],"cancel_pending":[{"path":"src/lib/paypal-tools.ts","line":251,"endLine":274}],"remind_pending":[{"path":"src/lib/mock-store.ts","line":230,"endLine":239}],"paid":[{"path":"src/lib/mock-store.ts","line":296,"endLine":318}],"cancelled":[{"path":"src/lib/mock-store.ts","line":241,"endLine":250}]}}</script>
     <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"to cycle","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.svg.auto":"SVG · Auto","viewer.export.svg.auto.hint":"Matches host theme","viewer.export.svg.light":"SVG · Light","viewer.export.svg.light.hint":"Always light","viewer.export.svg.dark":"SVG · Dark","viewer.export.svg.dark.hint":"Always dark","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Path: {source} → {target} · {count} step","viewer.export.card.routeSummary.other":"Path: {source} → {target} · {count} steps","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guide.title":"Explore this system","viewer.focus.selectedNodes":"{count} selected nodes","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.open":"Open diagram guide","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.verificationScope":"Verified against local Git at the pinned revision. Remote access has not been checked.","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.move":"Move semantic passport. Drag, use arrow keys, or press Home to reset.","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Path","viewer.route.start":"Click where the path starts","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Path","viewer.route.pickTwo":"Click two nodes on the diagram","viewer.route.pickOne":"Click a node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Click a start, then an end. Paths follow the arrows.","viewer.route.destination":"Where does the path from {label} end?","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"Pick two different nodes.","viewer.route.unreachable":"Cannot reach {label} from here","viewer.route.unreachable.detail":"{target} cannot be reached from {source} along the arrows. Pick a highlighted node.","viewer.route.start.instructions":"Next, pick the end. Only nodes you can reach will light up.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest path","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} step","viewer.route.overview.hop.other":"{count} steps","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} reachable node is highlighted. Click it.","viewer.route.destination.count.other":"{count} reachable nodes are highlighted. Click one.","viewer.route.noOutgoing":"No arrows lead out of this node. Clear it and pick another start.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.outline.title":"Node index","viewer.rail.show":"Notes \u0026 index","viewer.rail.controls":"Side panel","viewer.rail.collapse":"Collapse side panel","viewer.rail.bottom":"Move panel below the diagram","viewer.rail.right":"Move panel beside the diagram","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 950 584" data-reader-fit="intrinsic-height" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">Invoice lifecycle</title>
-        <desc id="archify-diagram-description">DRAFT → SENT → PAID / CANCELLED + reminders</desc>
+      <svg viewBox="0 0 1076 588" data-reader-fit="intrinsic-height" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="archify-diagram-title">Invoice status lifecycle</title>
+        <desc id="archify-diagram-description">A lifecycle diagram generated by Archify.</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5015,55 +5014,51 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
         <!-- Lifecycle bands -->
         <text x="18" y="88" class="t-dim" font-size="10" font-weight="600" writing-mode="vertical-rl" text-anchor="middle">Invoice status</text>
-        <text x="18" y="272" class="t-dim" font-size="10" font-weight="600" writing-mode="vertical-rl" text-anchor="middle">Reminders</text>
-        <text x="18" y="456" class="t-dim" font-size="10" font-weight="600" writing-mode="vertical-rl" text-anchor="middle">Terminal exits</text>
+        <text x="18" y="276" class="t-dim" font-size="10" font-weight="600" writing-mode="vertical-rl" text-anchor="middle">Awaiting human confirmation</text>
+        <text x="18" y="460" class="t-dim" font-size="10" font-weight="600" writing-mode="vertical-rl" text-anchor="middle">Terminal</text>
 
         <!-- Primary lifecycle rail -->
 
 
         <!-- Transition paths -->
         <g data-graph-role="automatic-crossover" style="--step:0">
-          <path data-graph-role="automatic-crossover-underlay" d="M 200 88 L 295 88" fill="none" stroke="var(--mask)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="draft" data-edge-to="sent" data-edge-label="confirm send" data-edge-key="0" data-composition-points="200,88;295,88" data-composition-crossover="halo" d="M 200 88 L 295 88" class="a-emphasis" data-animate="edge" style="--step:0" stroke-width="1.6" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 115 120 L 115 150 Q 115 160 125 160 L 294 160 Q 304 160 304 170 L 304 244" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="draft" data-edge-to="send_pending" data-edge-label="send_invoice" data-edge-key="0" data-composition-points="115,120;115,160;304,160;304,244" data-composition-crossover="halo" d="M 115 120 L 115 150 Q 115 160 125 160 L 294 160 Q 304 160 304 170 L 304 244" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
-          <path data-graph-role="automatic-crossover-underlay" d="M 435 88 L 520 88" fill="none" stroke="var(--mask)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="sent" data-edge-to="unpaid" data-edge-label="still open" data-edge-key="1" data-composition-points="435,88;520,88" data-composition-crossover="halo" d="M 435 88 L 520 88" class="a-emphasis" data-animate="edge" style="--step:1" stroke-width="1.6" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 364 244 L 364 192 Q 364 182 374 182 L 483 182 Q 493 182 493 172 L 493 120" fill="none" stroke="var(--mask)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="send_pending" data-edge-to="sent" data-edge-label="Confirm" data-edge-key="1" data-composition-points="364,244;364,182;493,182;493,120" data-composition-crossover="halo" d="M 364 244 L 364 192 Q 364 182 374 182 L 483 182 Q 493 182 493 172 L 493 120" class="a-emphasis" stroke-width="1.6" marker-end="url(#arrowhead-emphasis)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
-          <path data-graph-role="automatic-crossover-underlay" d="M 660 88 L 750 88" fill="none" stroke="var(--mask)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="unpaid" data-edge-to="paid" data-edge-label="client pays" data-edge-key="2" data-composition-points="660,88;750,88" data-composition-crossover="halo" d="M 660 88 L 750 88" class="a-emphasis" data-animate="edge" style="--step:2" stroke-width="1.6" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 334 244 L 334 148 Q 334 138 324 138 L 154 138 Q 145 138 145 129 L 145 120" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="send_pending" data-edge-to="draft" data-edge-label="Cancel on card" data-edge-key="2" data-composition-points="334,244;334,138;145,138;145,120" data-composition-crossover="halo" d="M 334 244 L 334 148 Q 334 138 324 138 L 154 138 Q 145 138 145 129 L 145 120" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 380 120 L 380 158 Q 380 168 390 168 L 795 168 Q 805 168 805 158 L 805 120" fill="none" stroke="var(--mask)" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="sent" data-edge-to="paid" data-edge-label="paid promptly" data-edge-key="3" data-composition-points="380,120;380,168;805,168;805,120" data-composition-crossover="halo" d="M 380 120 L 380 158 Q 380 168 390 168 L 795 168 Q 805 168 805 158 L 805 120" class="a-emphasis" data-animate="edge" style="--step:3" stroke-width="1.6" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 523 120 L 523 244" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="sent" data-edge-to="cancel_pending" data-edge-label="cancel" data-edge-key="3" data-composition-points="523,120;523,244" data-composition-crossover="halo" d="M 523 120 L 523 244" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 590 120 L 590 240" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="unpaid" data-edge-to="remind" data-edge-label="confirm remind" data-edge-key="4" data-composition-points="590,120;590,240" data-composition-crossover="halo" d="M 590 120 L 590 240" class="a-dashed" data-animate="edge" style="--step:4" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 538 308 L 538 428" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="cancel_pending" data-edge-to="cancelled" data-edge-label="Confirm" data-edge-key="4" data-composition-points="538,308;538,428" data-composition-crossover="halo" d="M 538 308 L 538 428" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
-          <path data-graph-role="automatic-crossover-underlay" d="M 605 240 L 605 120" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="remind" data-edge-to="unpaid" data-edge-label="still unpaid" data-edge-key="5" data-composition-points="605,240;605,120" data-composition-crossover="halo" d="M 605 240 L 605 120" class="a-dashed" data-animate="edge" style="--step:5" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 553 120 L 553 216 Q 553 226 563 226 L 718 226 Q 727 226 727 235 L 727 244" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="sent" data-edge-to="remind_pending" data-edge-label="remind" data-edge-key="5" data-composition-points="553,120;553,226;727,226;727,244" data-composition-crossover="halo" d="M 553 120 L 553 216 Q 553 226 563 226 L 718 226 Q 727 226 727 235 L 727 244" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
-          <path data-graph-role="automatic-crossover-underlay" d="M 350 120 L 350 424" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="sent" data-edge-to="cancelled" data-edge-label="confirm cancel" data-edge-key="6" data-composition-points="350,120;350,424" data-composition-crossover="halo" d="M 350 120 L 350 424" class="a-security" data-animate="edge" style="--step:6" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 757 244 L 757 214 Q 757 204 747 204 L 593 204 Q 583 204 583 194 L 583 120" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="remind_pending" data-edge-to="sent" data-edge-label="Confirm: count +1" data-edge-key="6" data-composition-points="757,244;757,204;583,204;583,120" data-composition-crossover="halo" d="M 757 244 L 757 214 Q 757 204 747 204 L 593 204 Q 583 204 583 194 L 583 120" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:7">
-          <path data-graph-role="automatic-crossover-underlay" d="M 560 120 L 560 182 Q 560 192 550 192 L 390 192 Q 380 192 380 202 L 380 424" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="unpaid" data-edge-to="cancelled" data-edge-label="confirm cancel" data-edge-key="7" data-composition-points="560,120;560,192;380,192;380,424" data-composition-crossover="halo" d="M 560 120 L 560 182 Q 560 192 550 192 L 390 192 Q 380 192 380 202 L 380 424" class="a-security" data-animate="edge" style="--step:7" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        </g>
-        <g data-graph-role="automatic-crossover" style="--step:8">
-          <path data-graph-role="automatic-crossover-underlay" d="M 835 120 L 835 424" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="paid" data-edge-to="refunded" data-edge-label="status map" data-edge-key="8" data-composition-points="835,120;835,424" data-composition-crossover="halo" d="M 835 120 L 835 424" class="a-dashed" data-animate="edge" style="--step:8" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 608 88 L 876 88" fill="none" stroke="var(--mask)" stroke-width="5.1" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="sent" data-edge-to="paid" data-edge-label="client pays" data-edge-key="7" data-composition-points="608,88;876,88" data-composition-crossover="halo" d="M 608 88 L 876 88" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
         </g>
 
         <!-- States -->
-        <g id="node-draft" data-node-id="draft" data-node-label="DRAFT" tabindex="0" role="button" aria-label="Focus DRAFT, create_invoice, Invoice status" aria-pressed="false" data-node-kind="start" data-node-sublabel="create_invoice" data-node-tag="local" data-node-context="Invoice status">
-          <title>DRAFT · create_invoice · Invoice status · local</title>
+        <g id="node-draft" data-node-id="draft" data-node-label="Draft" tabindex="0" role="button" aria-label="Focus Draft, create_invoice, Invoice status" aria-pressed="false" data-node-kind="start" data-node-sublabel="create_invoice" data-node-tag="DRAFT" data-node-context="Invoice status">
+          <title>Draft · create_invoice · Invoice status · DRAFT</title>
           <rect x="60" y="56" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="60" y="56" width="140" height="64" rx="7" class="c-frontend" data-animate="node" style="--step:0" stroke-width="1.5"/>
+          <rect x="60" y="56" width="140" height="64" rx="7" class="c-frontend" stroke-width="1.5"/>
           <g aria-hidden="true" data-lifecycle-initial-marker="">
             <circle cx="38" cy="88" r="4.5" style="fill: var(--arrow-emphasis)"/><path d="M 42.5 88 L 53 88" class="a-emphasis" stroke-width="1.4"/><path d="M 52 84.5 L 59 88 L 52 91.5 Z" style="fill: var(--arrow-emphasis)"/>
           </g>
@@ -5072,159 +5067,150 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
             <path d="m7 5.4 3.6 2.6L7 10.6Z" class="sigil-fill"/>
           </g>
         <text data-detail="fine" x="83" y="70" class="t-frontend" font-size="8" font-weight="700">01</text>
-          <text data-node-label="" data-detail-anchor="" x="130" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">DRAFT</text>
+          <text data-node-label="" data-detail-anchor="" x="130" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Draft</text>
           <text data-detail="context" x="130" y="96" class="t-muted" font-size="8" text-anchor="middle">create_invoice</text>
-        <text data-detail="fine" x="130" y="108" class="t-frontend" font-size="8" text-anchor="middle">local</text>
+        <text data-detail="fine" x="130" y="108" class="t-frontend" font-size="8" text-anchor="middle">DRAFT</text>
         </g>
 
-        <g id="node-sent" data-node-id="sent" data-node-label="SENT" tabindex="0" role="button" aria-label="Focus SENT, after confirm, Invoice status" aria-pressed="false" data-node-kind="active" data-node-sublabel="after confirm" data-node-tag="client notified" data-node-context="Invoice status">
-          <title>SENT · after confirm · Invoice status · client notified</title>
-          <rect x="295" y="56" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="295" y="56" width="140" height="64" rx="7" class="c-frontend" data-animate="node" style="--step:1" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-frontend" transform="translate(301 62) scale(0.6875)">
-            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
-          </g>
-        <text data-detail="fine" x="318" y="70" class="t-frontend" font-size="8" font-weight="700">02</text>
-          <text data-node-label="" data-detail-anchor="" x="365" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SENT</text>
-          <text data-detail="context" x="365" y="96" class="t-muted" font-size="8" text-anchor="middle">after confirm</text>
-        <text data-detail="fine" x="365" y="108" class="t-frontend" font-size="8" text-anchor="middle">client notified</text>
-        </g>
-
-        <g id="node-unpaid" data-node-id="unpaid" data-node-label="UNPAID" tabindex="0" role="button" aria-label="Focus UNPAID, awaiting payment, Invoice status" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="awaiting payment" data-node-tag="open" data-node-context="Invoice status">
-          <title>UNPAID · awaiting payment · Invoice status · open</title>
-          <rect x="520" y="56" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="520" y="56" width="140" height="64" rx="7" class="c-cloud" data-animate="node" style="--step:2" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(526 62) scale(0.6875)">
+        <g id="node-send_pending" data-node-id="send_pending" data-node-label="Send pending" tabindex="0" role="button" aria-label="Focus Send pending, needs_confirmation, Awaiting human confirmation" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="needs_confirmation" data-node-tag="pending action" data-node-context="Awaiting human confirmation">
+          <title>Send pending · needs_confirmation · Awaiting human confirmation · pending action</title>
+          <rect x="264" y="244" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="264" y="244" width="140" height="64" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(270 250) scale(0.6875)">
             <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
           </g>
-        <text data-detail="fine" x="543" y="70" class="t-cloud" font-size="8" font-weight="700">03</text>
-          <text data-node-label="" data-detail-anchor="" x="590" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">UNPAID</text>
-          <text data-detail="context" x="590" y="96" class="t-muted" font-size="8" text-anchor="middle">awaiting payment</text>
-        <text data-detail="fine" x="590" y="108" class="t-cloud" font-size="8" text-anchor="middle">open</text>
+        <text data-detail="fine" x="287" y="258" class="t-cloud" font-size="8" font-weight="700">02</text>
+          <text data-node-label="" data-detail-anchor="" x="334" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Send pending</text>
+          <text data-detail="context" x="334" y="288.3" class="t-muted" font-size="8" text-anchor="middle">needs_confirmation</text>
+        <text data-detail="fine" x="334" y="299.7" class="t-cloud" font-size="8" text-anchor="middle">pending action</text>
         </g>
 
-        <g id="node-paid" data-node-id="paid" data-node-label="PAID" tabindex="0" role="button" aria-label="Focus PAID, collected, Invoice status" aria-pressed="false" data-node-kind="success" data-node-sublabel="collected" data-node-tag="success" data-node-context="Invoice status">
-          <title>PAID · collected · Invoice status · success</title>
-          <rect x="750" y="56" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="750" y="56" width="140" height="64" rx="7" class="c-backend" data-animate="node" style="--step:3" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-backend" transform="translate(756 62) scale(0.6875)">
+        <g id="node-sent" data-node-id="sent" data-node-label="Sent" tabindex="0" role="button" aria-label="Focus Sent, unpaid on the desk, Invoice status" aria-pressed="false" data-node-kind="active" data-node-sublabel="unpaid on the desk" data-node-tag="SENT" data-node-context="Invoice status">
+          <title>Sent · unpaid on the desk · Invoice status · SENT</title>
+          <rect x="468" y="56" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="468" y="56" width="140" height="64" rx="7" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-frontend" transform="translate(474 62) scale(0.6875)">
+            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
+          </g>
+        <text data-detail="fine" x="491" y="70" class="t-frontend" font-size="8" font-weight="700">03</text>
+          <text data-node-label="" data-detail-anchor="" x="538" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Sent</text>
+          <text data-detail="context" x="538" y="96" class="t-muted" font-size="8" text-anchor="middle">unpaid on the desk</text>
+        <text data-detail="fine" x="538" y="108" class="t-frontend" font-size="8" text-anchor="middle">SENT</text>
+        </g>
+
+        <g id="node-cancel_pending" data-node-id="cancel_pending" data-node-label="Cancel pending" tabindex="0" role="button" aria-label="Focus Cancel pending, cancel_sent_invoice, Awaiting human confirmation" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="cancel_sent_invoice" data-node-tag="pending action" data-node-context="Awaiting human confirmation">
+          <title>Cancel pending · cancel_sent_invoice · Awaiting human confirmation · pending action</title>
+          <rect x="468" y="244" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="468" y="244" width="140" height="64" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(474 250) scale(0.6875)">
+            <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="538" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Cancel pending</text>
+          <text data-detail="context" x="538" y="288.3" class="t-muted" font-size="8" text-anchor="middle">cancel_sent_invoice</text>
+        <text data-detail="fine" x="538" y="299.7" class="t-cloud" font-size="8" text-anchor="middle">pending action</text>
+        </g>
+
+        <g id="node-remind_pending" data-node-id="remind_pending" data-node-label="Reminder pending" tabindex="0" role="button" aria-label="Focus Reminder pending, send_invoice_reminder, Awaiting human confirmation" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="send_invoice_reminder" data-node-tag="pending action" data-node-context="Awaiting human confirmation">
+          <title>Reminder pending · send_invoice_reminder · Awaiting human confirmation · pending action</title>
+          <rect x="672" y="244" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="672" y="244" width="140" height="64" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(678 250) scale(0.6875)">
+            <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="742" y="276" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Reminder pending</text>
+          <text data-detail="context" x="742" y="288.3" class="t-muted" font-size="8" text-anchor="middle">send_invoice_reminder</text>
+        <text data-detail="fine" x="742" y="299.7" class="t-cloud" font-size="8" text-anchor="middle">pending action</text>
+        </g>
+
+        <g id="node-paid" data-node-id="paid" data-node-label="Paid" tabindex="0" role="button" aria-label="Focus Paid, recorded by PayPal, Invoice status" aria-pressed="false" data-node-kind="success" data-node-sublabel="recorded by PayPal" data-node-tag="read-only" data-node-context="Invoice status">
+          <title>Paid · recorded by PayPal · Invoice status · read-only</title>
+          <rect x="876" y="56" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="876" y="56" width="140" height="64" rx="7" class="c-backend" stroke-width="1.5"/>
+          <rect x="879" y="59" width="134" height="58" rx="4" class="c-backend" style="fill: none" stroke-width="1"/>
+          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-backend" transform="translate(882 62) scale(0.6875)">
             <circle cx="8" cy="8" r="5.3"/>
             <path d="m5.2 8 1.8 1.8 3.8-4"/>
           </g>
-        <text data-detail="fine" x="773" y="70" class="t-backend" font-size="8" font-weight="700">04</text>
-          <text data-node-label="" data-detail-anchor="" x="820" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">PAID</text>
-          <text data-detail="context" x="820" y="96" class="t-muted" font-size="8" text-anchor="middle">collected</text>
-        <text data-detail="fine" x="820" y="108" class="t-backend" font-size="8" text-anchor="middle">success</text>
+        <text data-detail="fine" x="899" y="70" class="t-backend" font-size="8" font-weight="700">04</text>
+          <text data-node-label="" data-detail-anchor="" x="946" y="79" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Paid</text>
+          <text data-detail="context" x="946" y="96" class="t-muted" font-size="8" text-anchor="middle">recorded by PayPal</text>
+        <text data-detail="fine" x="946" y="108" class="t-backend" font-size="8" text-anchor="middle">read-only</text>
         </g>
 
-        <g id="node-remind" data-node-id="remind" data-node-label="Reminder sent" tabindex="0" role="button" aria-label="Focus Reminder sent, reminder_count++, Reminders" aria-pressed="false" data-node-kind="active" data-node-sublabel="reminder_count++" data-node-tag="confirm first" data-node-context="Reminders">
-          <title>Reminder sent · reminder_count++ · Reminders · confirm first</title>
-          <rect x="520" y="240" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="520" y="240" width="140" height="64" rx="7" class="c-frontend" data-animate="node" style="--step:5" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-frontend" transform="translate(526 246) scale(0.6875)">
-            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="590" y="263" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Reminder sent</text>
-          <text data-detail="context" x="590" y="280" class="t-muted" font-size="8" text-anchor="middle">reminder_count++</text>
-        <text data-detail="fine" x="590" y="292" class="t-frontend" font-size="8" text-anchor="middle">confirm first</text>
-        </g>
-
-        <g id="node-cancelled" data-node-id="cancelled" data-node-label="CANCELLED" tabindex="0" role="button" aria-label="Focus CANCELLED, cancel_sent_invoice, Terminal exits" aria-pressed="false" data-node-kind="failure" data-node-sublabel="cancel_sent_invoice" data-node-tag="terminal" data-node-context="Terminal exits">
-          <title>CANCELLED · cancel_sent_invoice · Terminal exits · terminal</title>
-          <rect x="295" y="424" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="295" y="424" width="140" height="64" rx="7" class="c-security" data-animate="node" style="--step:7" stroke-width="1.5"/>
-          <rect x="298" y="427" width="134" height="58" rx="4" class="c-security" style="fill: none" stroke-width="1"/>
-          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(301 430) scale(0.6875)">
+        <g id="node-cancelled" data-node-id="cancelled" data-node-label="Cancelled" tabindex="0" role="button" aria-label="Focus Cancelled, cancelInvoice, Terminal" aria-pressed="false" data-node-kind="failure" data-node-sublabel="cancelInvoice" data-node-tag="CANCELLED" data-node-context="Terminal">
+          <title>Cancelled · cancelInvoice · Terminal · CANCELLED</title>
+          <rect x="468" y="428" width="140" height="64" rx="7" class="c-mask"/>
+          <rect x="468" y="428" width="140" height="64" rx="7" class="c-security" stroke-width="1.5"/>
+          <rect x="471" y="431" width="134" height="58" rx="4" class="c-security" style="fill: none" stroke-width="1"/>
+          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(474 434) scale(0.6875)">
             <circle cx="8" cy="8" r="5.3"/>
             <path d="m5.7 5.7 4.6 4.6m0-4.6-4.6 4.6"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="365" y="447" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">CANCELLED</text>
-          <text data-detail="context" x="365" y="464" class="t-muted" font-size="8" text-anchor="middle">cancel_sent_invoice</text>
-        <text data-detail="fine" x="365" y="476" class="t-security" font-size="8" text-anchor="middle">terminal</text>
-        </g>
-
-        <g id="node-refunded" data-node-id="refunded" data-node-label="REFUNDED" tabindex="0" role="button" aria-label="Focus REFUNDED, status only, Terminal exits" aria-pressed="false" data-node-kind="neutral" data-node-sublabel="status only" data-node-tag="terminal" data-node-context="Terminal exits">
-          <title>REFUNDED · status only · Terminal exits · terminal</title>
-          <rect x="750" y="424" width="140" height="64" rx="7" class="c-mask"/>
-          <rect x="750" y="424" width="140" height="64" rx="7" class="c-external" data-animate="node" style="--step:9" stroke-width="1.5"/>
-          <rect x="753" y="427" width="134" height="58" rx="4" class="c-external" style="fill: none" stroke-width="1"/>
-          <g aria-hidden="true" data-semantic-sigil="neutral" class="semantic-sigil s-external" transform="translate(756 430) scale(0.6875)">
-            <rect x="3" y="3" width="10" height="10" rx="2"/>
-            <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="820" y="447" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">REFUNDED</text>
-          <text data-detail="context" x="820" y="464" class="t-muted" font-size="8" text-anchor="middle">status only</text>
-        <text data-detail="fine" x="820" y="476" class="t-muted" font-size="8" text-anchor="middle">terminal</text>
+          <text data-node-label="" data-detail-anchor="" x="536.3" y="451" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Cancelled</text>
+          <text data-detail="context" x="538" y="468" class="t-muted" font-size="8" text-anchor="middle">cancelInvoice</text>
+        <text data-detail="fine" x="538" y="480" class="t-security" font-size="8" text-anchor="middle">CANCELLED</text>
         </g>
 
         <!-- Transition labels -->
-        <g data-detail="context" data-edge-from="draft" data-edge-to="sent" data-edge-label="confirm send" data-edge-key="0">
-          <rect x="212.1" y="67" width="70.80000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="247.5" y="78" class="t-edge-emphasis" font-size="8" text-anchor="middle">confirm send</text>
+        <g data-detail="context" data-edge-from="draft" data-edge-to="send_pending" data-edge-label="send_invoice" data-edge-key="0">
+          <rect x="38.19999999999999" y="132" width="70.80000000000001" height="16" rx="4" class="c-mask"/>
+          <text x="73.6" y="143" class="t-edge-default" font-size="8" text-anchor="middle">send_invoice</text>
         </g>
-        <g data-detail="context" data-edge-from="sent" data-edge-to="unpaid" data-edge-label="still open" data-edge-key="1">
-          <rect x="447" y="67" width="61" height="16" rx="4" class="c-mask"/>
-          <text x="477.5" y="78" class="t-edge-emphasis" font-size="8" text-anchor="middle">still open</text>
+        <g data-detail="context" data-edge-from="send_pending" data-edge-to="sent" data-edge-label="Confirm" data-edge-key="1">
+          <rect x="370" y="205" width="46.300000000000004" height="16" rx="4" class="c-mask"/>
+          <text x="393.15" y="216" class="t-edge-emphasis" font-size="8" text-anchor="middle">Confirm</text>
         </g>
-        <g data-detail="context" data-edge-from="unpaid" data-edge-to="paid" data-edge-label="client pays" data-edge-key="2">
-          <rect x="672.05" y="67" width="65.9" height="16" rx="4" class="c-mask"/>
-          <text x="705" y="78" class="t-edge-emphasis" font-size="8" text-anchor="middle">client pays</text>
+        <g data-detail="context" data-edge-from="send_pending" data-edge-to="draft" data-edge-label="Cancel on card" data-edge-key="2">
+          <rect x="340" y="156.5" width="80.60000000000001" height="16" rx="4" class="c-mask"/>
+          <text x="380.3" y="167.5" class="t-edge-dashed" font-size="8" text-anchor="middle">Cancel on card</text>
         </g>
-        <g data-detail="context" data-edge-from="sent" data-edge-to="paid" data-edge-label="paid promptly" data-edge-key="3">
-          <rect x="386" y="136" width="75.7" height="16" rx="4" class="c-mask"/>
-          <text x="423.85" y="147" class="t-edge-emphasis" font-size="8" text-anchor="middle">paid promptly</text>
+        <g data-detail="context" data-edge-from="sent" data-edge-to="cancel_pending" data-edge-label="cancel" data-edge-key="3">
+          <rect x="475.6" y="205" width="41.400000000000006" height="16" rx="4" class="c-mask"/>
+          <text x="496.3" y="216" class="t-edge-security" font-size="8" text-anchor="middle">cancel</text>
         </g>
-        <g data-detail="context" data-edge-from="unpaid" data-edge-to="remind" data-edge-label="confirm remind" data-edge-key="4">
-          <rect x="612" y="172" width="80.60000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="652.3" y="183" class="t-edge-dashed" font-size="8" text-anchor="middle">confirm remind</text>
+        <g data-detail="context" data-edge-from="cancel_pending" data-edge-to="cancelled" data-edge-label="Confirm" data-edge-key="4">
+          <rect x="485.70000000000005" y="360" width="46.300000000000004" height="16" rx="4" class="c-mask"/>
+          <text x="508.85" y="371" class="t-edge-security" font-size="8" text-anchor="middle">Confirm</text>
         </g>
-        <g data-detail="context" data-edge-from="remind" data-edge-to="unpaid" data-edge-label="still unpaid" data-edge-key="5">
-          <rect x="611" y="202" width="70.80000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="646.4" y="213" class="t-edge-dashed" font-size="8" text-anchor="middle">still unpaid</text>
+        <g data-detail="context" data-edge-from="sent" data-edge-to="remind_pending" data-edge-label="remind" data-edge-key="5">
+          <rect x="619.3" y="235" width="41.400000000000006" height="16" rx="4" class="c-mask"/>
+          <text x="640" y="246" class="t-edge-default" font-size="8" text-anchor="middle">remind</text>
         </g>
-        <g data-detail="context" data-edge-from="sent" data-edge-to="cancelled" data-edge-label="confirm cancel" data-edge-key="6">
-          <rect x="263.4" y="264" width="80.60000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="303.7" y="275" class="t-edge-security" font-size="8" text-anchor="middle">confirm cancel</text>
+        <g data-detail="context" data-edge-from="remind_pending" data-edge-to="sent" data-edge-label="Confirm: count +1" data-edge-key="6">
+          <rect x="763" y="216" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
+          <text x="810.65" y="227" class="t-edge-default" font-size="8" text-anchor="middle">Confirm: count +1</text>
         </g>
-        <g data-detail="context" data-edge-from="unpaid" data-edge-to="cancelled" data-edge-label="confirm cancel" data-edge-key="7">
-          <rect x="473.40000000000003" y="130" width="80.60000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="513.7" y="141" class="t-edge-security" font-size="8" text-anchor="middle">confirm cancel</text>
-        </g>
-        <g data-detail="context" data-edge-from="paid" data-edge-to="refunded" data-edge-label="status map" data-edge-key="8">
-          <rect x="841" y="264" width="61" height="16" rx="4" class="c-mask"/>
-          <text x="871.5" y="275" class="t-edge-dashed" font-size="8" text-anchor="middle">status map</text>
+        <g data-detail="context" data-edge-from="sent" data-edge-to="paid" data-edge-label="client pays" data-edge-key="7">
+          <rect x="709.05" y="67" width="65.9" height="16" rx="4" class="c-mask"/>
+          <text x="742" y="78" class="t-edge-dashed" font-size="8" text-anchor="middle">client pays</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="" data-legend-bridge="">
-          <text x="40" y="528" class="t-primary" font-size="12" font-weight="650">Legend</text>
-          <g data-legend-semantic-kind="start" data-legend-kind="start" data-legend-label="initial state" data-legend-x="40" data-legend-baseline="548" data-legend-width="120">
-            <circle cx="44.5" cy="544.5" r="4.5" style="fill: var(--arrow-emphasis)"/><path d="M 49 544.5 L 58 544.5" class="a-emphasis" stroke-width="1.4"/><path d="M 57 541 L 64 544.5 L 57 548 Z" style="fill: var(--arrow-emphasis)"/>
-            <text x="74" y="548" class="t-muted" font-size="10" font-weight="500">initial state</text>
+          <text x="40" y="532" class="t-primary" font-size="12" font-weight="650">Legend</text>
+          <g data-legend-semantic-kind="start" data-legend-kind="start" data-legend-label="initial state" data-legend-x="40" data-legend-baseline="552" data-legend-width="120">
+            <circle cx="44.5" cy="548.5" r="4.5" style="fill: var(--arrow-emphasis)"/><path d="M 49 548.5 L 58 548.5" class="a-emphasis" stroke-width="1.4"/><path d="M 57 545 L 64 548.5 L 57 552 Z" style="fill: var(--arrow-emphasis)"/>
+            <text x="74" y="552" class="t-muted" font-size="10" font-weight="500">initial state</text>
           </g>
-          <g data-legend-semantic-kind="active" data-legend-kind="active" data-legend-label="active" data-legend-x="182" data-legend-baseline="548" data-legend-width="73">
-            <rect x="182" y="540" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-            <text x="204" y="548" class="t-muted" font-size="10" font-weight="500">active</text>
+          <g data-legend-semantic-kind="active" data-legend-kind="active" data-legend-label="active" data-legend-x="182" data-legend-baseline="552" data-legend-width="73">
+            <rect x="182" y="544" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+            <text x="204" y="552" class="t-muted" font-size="10" font-weight="500">active</text>
           </g>
-          <g data-legend-semantic-kind="waiting" data-legend-kind="waiting" data-legend-label="waiting" data-legend-x="277" data-legend-baseline="548" data-legend-width="78">
-            <rect x="277" y="540" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="299" y="548" class="t-muted" font-size="10" font-weight="500">waiting</text>
+          <g data-legend-semantic-kind="waiting" data-legend-kind="waiting" data-legend-label="waiting" data-legend-x="277" data-legend-baseline="552" data-legend-width="78">
+            <rect x="277" y="544" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+            <text x="299" y="552" class="t-muted" font-size="10" font-weight="500">waiting</text>
           </g>
-          <g data-legend-semantic-kind="success" data-legend-kind="success" data-legend-label="success" data-legend-x="377" data-legend-baseline="548" data-legend-width="78">
-            <rect x="377" y="540" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="399" y="548" class="t-muted" font-size="10" font-weight="500">success</text>
+          <g data-legend-semantic-kind="success" data-legend-kind="success" data-legend-label="success" data-legend-x="377" data-legend-baseline="552" data-legend-width="78">
+            <rect x="377" y="544" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+            <text x="399" y="552" class="t-muted" font-size="10" font-weight="500">success</text>
           </g>
-          <g data-legend-semantic-kind="failure" data-legend-kind="failure" data-legend-label="failure / exit" data-legend-x="477" data-legend-baseline="548" data-legend-width="113">
-            <rect x="477" y="540" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="499" y="548" class="t-muted" font-size="10" font-weight="500">failure / exit</text>
+          <g data-legend-semantic-kind="failure" data-legend-kind="failure" data-legend-label="failure / exit" data-legend-x="477" data-legend-baseline="552" data-legend-width="113">
+            <rect x="477" y="544" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+            <text x="499" y="552" class="t-muted" font-size="10" font-weight="500">failure / exit</text>
           </g>
-          <g data-legend-semantic-kind="neutral" data-legend-kind="neutral" data-legend-label="neutral" data-legend-x="612" data-legend-baseline="548" data-legend-width="78">
-            <rect x="612" y="540" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="634" y="548" class="t-muted" font-size="10" font-weight="500">neutral</text>
-          </g>
-          <g data-legend-semantic-kind="final" data-legend-x="712" data-legend-baseline="548" data-legend-width="79">
-            <rect x="712" y="540" width="14" height="9" rx="2" class="c-external" stroke-width="1"/><rect x="714.5" y="542.5" width="9" height="4" rx="1" class="c-external" style="fill: none" stroke-width="0.8"/>
-            <text x="736" y="548" class="t-muted" font-size="10" font-weight="500">final state</text>
+          <g data-legend-semantic-kind="final" data-legend-x="612" data-legend-baseline="552" data-legend-width="79">
+            <rect x="612" y="544" width="14" height="9" rx="2" class="c-external" stroke-width="1"/><rect x="614.5" y="546.5" width="9" height="4" rx="1" class="c-external" style="fill: none" stroke-width="0.8"/>
+            <text x="636" y="552" class="t-muted" font-size="10" font-weight="500">final state</text>
           </g>
         </g>
       </svg>
@@ -5405,37 +5391,37 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>Happy path</h3>
+          <div class="card-dot amber"></div>
+          <h3>Wait states</h3>
         </div>
         <ul>
-          <li>create_invoice always starts as DRAFT</li>
-          <li>ConfirmCard send moves the invoice to SENT</li>
-          <li>Dashboard aggregates unpaid, paid, and drafts</li>
+          <li>Each write first becomes a pending action owned by the browser session, valid 15 minutes</li>
+          <li>Confirm executes it once; Cancel on the card leaves the status unchanged</li>
+          <li>An unknown PayPal outcome is terminal: check the dashboard before proposing again</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot amber"></div>
-          <h3>Reminders</h3>
+          <div class="card-dot cyan"></div>
+          <h3>Who changes status</h3>
         </div>
         <ul>
-          <li>send_invoice_reminder needs human confirmation</li>
-          <li>Mock store increments reminder_count</li>
-          <li>QR / payment link stays available while unpaid</li>
+          <li>Local rows: mock-store sendInvoice / remindInvoice / cancelInvoice</li>
+          <li>PayPal rows: the sandbox toolkit, then the desk row is refreshed</li>
+          <li>Paid is never set by the app; it comes from PayPal (or the seed data)</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot rose"></div>
-          <h3>Exits</h3>
+          <h3>Guards in code</h3>
         </div>
         <ul>
-          <li>cancel_sent_invoice is confirmation-gated</li>
-          <li>PAID / CANCELLED stop reminder prompts</li>
-          <li>Types also allow PARTIALLY_PAID and PAYMENT_PENDING</li>
+          <li>Send only from DRAFT or SCHEDULED</li>
+          <li>Remind only from SENT, UNPAID or PARTIALLY_PAID</li>
+          <li>Cancel from any status except PAID or CANCELLED (drafts too)</li>
         </ul>
       </div>
     </div>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4fd37699-b6fc-4d8d-a212-18afff713b14",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/src/sequence-create-send.json",
+  "output": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/sequence-create-send.html",
+  "specification": {
+    "sha256": "cdfa00eebe4b2a540c77f0c367431d89d9706ad5a5b33fde9efc012c0938599e",
+    "bytes": 6502
+  },
+  "artifact": {
+    "sha256": "3490f8079e9f9ba67a50b270fbf09902efa0687bba1354ec57cb529a0374f8ba",
+    "bytes": 764010
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a851da85-3fd0-440c-ba25-1a87f55b1be2",
+  "status": "current",
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/src/lifecycle.json",
+  "output": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/lifecycle.html",
+  "specification": {
+    "sha256": "8315a5398becf17803007f8aab60c1b8f9e77eb1f5decfe01c64d30e199b5f26",
+    "bytes": 4962
+  },
+  "artifact": {
+    "sha256": "29b8d485089c62366d2a4181a64fc8b65d27690c0a69f4e6b52aad753780fe7f",
+    "bytes": 761780
+  }
+}

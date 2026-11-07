@@ -76,9 +76,9 @@
   <section id="arch">
     <h2>Architecture</h2>
     <p>One Next.js 15 app (App Router). The browser calls four API routes, and the routes call shared libraries in <code>src/lib/</code>. Every API request passes a guard (same-origin JSON; loopback only while live credentials are active). With no keys, every write lands in the in-memory store; the PayPal Agent Toolkit is used only when both PayPal keys are set, the server is bound to loopback and the Invoicing probe passes.</p>
-    <figure class="wd-embed">
-      <iframe src="diagrams/architecture.html" title="Interactive architecture diagram of Invoice Copilot" loading="lazy" style="display:block;width:100%;height:720px;border:1px solid var(--wd-line);border-radius:8px;background:var(--wd-bg)"></iframe>
-      <figcaption>Interactive diagram (Archify): hover a box for its source lines, use PATH or LENS to trace a route. <a href="diagrams/architecture.html">Open it full screen</a>.</figcaption>
+    <figure class="wd-frame">
+      <iframe src="diagrams/architecture.html" title="Architecture diagram: browser UI, API routes with their guard, demo agent or LLM, invoice tools, in-memory state, the pending-action executor, PayPal Agent Toolkit and PayPal sandbox" loading="lazy" style="aspect-ratio: 1500 / 832"></iframe>
+      <figcaption>Hover a box for its source lines. <a href="diagrams/architecture.html" target="_blank" rel="noopener">Open full screen ↗</a> · drawn from <code>src/app/api/*</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/pending.ts</code>, source <code>docs/diagrams/src/architecture.json</code></figcaption>
     </figure>
     <ul>
       <li><strong>Browser UI</strong> (<code>ChatPanel</code>, <code>ConfirmCard</code>, desk) → <code>POST /api/chat</code>, <code>POST /api/confirm</code>; <code>AppShell</code> → <code>GET /api/invoices</code> and <code>GET /api/health</code>.</li>
@@ -86,8 +86,8 @@
       <li><strong>Invoice tools</strong> are built per browser session and write to the <strong>in-memory store</strong> by default; with keys and a passing probe, create and list go to the <strong>PayPal Agent Toolkit</strong> → <strong>PayPal Invoicing v2</strong>, always in sandbox (any other <code>PAYPAL_ENVIRONMENT</code> disables PayPal).</li>
       <li>Send, remind and cancel only record a pending action, owned by the session cookie, valid 15 minutes. No LLM tool can confirm. Only <strong><code>/api/confirm</code></strong> from the same browser runs it, once: PayPal for PayPal-sourced invoices, a status change in memory for local rows.</li>
     </ul>
-    <p>More diagrams from the same sources: <a href="how-it-works.html#diagrams">sequence, workflow and invoice lifecycle</a>.</p>
-    <p class="wd-source">Source: <code>src/components/AppShell.tsx</code>, <code>src/components/ChatPanel.tsx</code>, <code>src/app/api/*/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/mock-store.ts</code>. Diagram source: <code>.archify/architecture-invoice-copilot-*/candidate.json</code> (regenerate with Archify <code>finalize</code>).</p>
+    <p>More diagrams from the same sources: <a href="how-it-works.html#process">workflow</a> and <a href="how-it-works.html#states">invoice states</a> on How it works, <a href="api.html#shapes">request sequence</a> on API.</p>
+    <p class="wd-source">Source: <code>src/components/AppShell.tsx</code>, <code>src/components/ChatPanel.tsx</code>, <code>src/app/api/*/route.ts</code>, <code>src/lib/paypal-tools.ts</code>, <code>src/lib/mock-store.ts</code>. Diagram: Archify, source <code>docs/diagrams/src/architecture.json</code>.</p>
   </section>
   <!-- workdocs:end id=arch -->
 

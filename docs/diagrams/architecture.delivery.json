@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "8c37d7e7-4fe9-4a69-a6c5-c2b591b0819d",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/src/architecture.json",
+  "output": "/Users/nnquangit/projects/private/challenges/paypal-invoice/docs/diagrams/architecture.html",
+  "specification": {
+    "sha256": "f256a94921917b601a7f3f19cd5ca086a4897d478145ab8e03a0d15f25ce8f33",
+    "bytes": 9419
+  },
+  "artifact": {
+    "sha256": "ba15b4a7ca73e69280ef5c25623044ea0ab52a9015eb1da1bccbcaf4057bebdf",
+    "bytes": 773475
+  }
+}

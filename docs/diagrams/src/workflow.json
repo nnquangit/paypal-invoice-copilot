@@ -1,0 +1,350 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "One chat turn: agent choice, human gate, execution",
+    "output": "docs/diagrams/workflow.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "git@github-paypal:nnquangit/paypal-invoice-copilot.git",
+      "revision": "52161a509b2689c3c3af61da91871be194ff35ea",
+      "link_mode": "local-only"
+    }
+  },
+  "lanes": [
+    {
+      "id": "out",
+      "label": "Browser + PayPal"
+    },
+    {
+      "id": "server",
+      "label": "Next.js server"
+    },
+    {
+      "id": "gate",
+      "label": "Human gate",
+      "variant": "exception"
+    },
+    {
+      "id": "mem",
+      "label": "Zero-key, in memory"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ask",
+      "label": "Ask",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "draft",
+      "label": "Draft + propose",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "act",
+      "label": "Confirm + execute",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "request",
+    "post",
+    "route",
+    "llm",
+    "pending",
+    "card",
+    "confirm",
+    "execute",
+    "paypal"
+  ],
+  "nodes": [
+    {
+      "id": "request",
+      "lane": "out",
+      "col": 0,
+      "type": "external",
+      "label": "Freelancer",
+      "sublabel": "billing request",
+      "width": 140
+    },
+    {
+      "id": "post",
+      "lane": "out",
+      "col": 1,
+      "type": "frontend",
+      "label": "ChatPanel",
+      "sublabel": "POST /api/chat",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/components/ChatPanel.tsx",
+          "line": 85,
+          "end_line": 145
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "lane": "gate",
+      "col": 4,
+      "type": "frontend",
+      "label": "ConfirmCard",
+      "sublabel": "Confirm or Cancel",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/components/ConfirmCard.tsx",
+          "line": 5,
+          "end_line": 53
+        }
+      ]
+    },
+    {
+      "id": "route",
+      "lane": "server",
+      "col": 1,
+      "type": "backend",
+      "label": "LLM configured?",
+      "sublabel": "guard + session",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/app/api/chat/route.ts",
+          "line": 23,
+          "end_line": 61
+        },
+        {
+          "path": "src/lib/config.ts",
+          "line": 89,
+          "end_line": 98,
+          "label": "isLlmConfigured"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "lane": "server",
+      "col": 2,
+      "type": "backend",
+      "label": "LLM tool loop",
+      "sublabel": "create + send_invoice",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/app/api/chat/route.ts",
+          "line": 62,
+          "end_line": 123
+        }
+      ]
+    },
+    {
+      "id": "demo",
+      "lane": "mem",
+      "col": 2,
+      "type": "backend",
+      "label": "Demo agent",
+      "sublabel": "regex intents",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/lib/demo-agent.ts",
+          "line": 89,
+          "end_line": 273
+        }
+      ]
+    },
+    {
+      "id": "mockexec",
+      "lane": "mem",
+      "col": 5,
+      "type": "database",
+      "label": "Mock status change",
+      "sublabel": "executeMockAction",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 377,
+          "end_line": 386
+        }
+      ]
+    },
+    {
+      "id": "pending",
+      "lane": "gate",
+      "col": 3,
+      "type": "security",
+      "label": "Pending action",
+      "sublabel": "owner \u00b7 15 min",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 251,
+          "end_line": 274
+        },
+        {
+          "path": "src/lib/pending.ts",
+          "line": 67,
+          "end_line": 91
+        }
+      ]
+    },
+    {
+      "id": "confirm",
+      "lane": "server",
+      "col": 4,
+      "type": "security",
+      "label": "/api/confirm",
+      "sublabel": "same session?",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/app/api/confirm/route.ts",
+          "line": 24,
+          "end_line": 63
+        }
+      ]
+    },
+    {
+      "id": "execute",
+      "lane": "server",
+      "col": 5,
+      "type": "backend",
+      "label": "PayPal row?",
+      "sublabel": "claim once",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 501,
+          "end_line": 562
+        }
+      ]
+    },
+    {
+      "id": "paypal",
+      "lane": "out",
+      "col": 5,
+      "type": "cloud",
+      "label": "PayPal toolkit",
+      "sublabel": "send / remind / cancel",
+      "width": 140,
+      "sources": [
+        {
+          "path": "src/lib/paypal-tools.ts",
+          "line": 403,
+          "end_line": 492
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-ask",
+      "from": "request",
+      "to": "post"
+    },
+    {
+      "id": "e-post",
+      "from": "post",
+      "to": "route",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-llm",
+      "from": "route",
+      "to": "llm",
+      "label": "yes"
+    },
+    {
+      "id": "e-demo",
+      "from": "route",
+      "to": "demo",
+      "label": "no / forced",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "e-llm-pend",
+      "from": "llm",
+      "to": "pending",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-demo-pend",
+      "from": "demo",
+      "to": "pending",
+      "role": "branch"
+    },
+    {
+      "id": "e-card",
+      "from": "pending",
+      "to": "card",
+      "label": "pendingAction"
+    },
+    {
+      "id": "e-confirm",
+      "from": "card",
+      "to": "confirm",
+      "variant": "security",
+      "label": "Confirm"
+    },
+    {
+      "id": "e-exec",
+      "from": "confirm",
+      "to": "execute",
+      "label": "true",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-live",
+      "from": "execute",
+      "to": "paypal",
+      "label": "yes",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e-mock",
+      "from": "execute",
+      "to": "mockexec",
+      "label": "no",
+      "role": "branch",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Two agents, one gate",
+      "items": [
+        "The LLM path needs LLM_API_KEY, a loopback bind and no DEMO_MODE / FORCE_DEMO_AGENT",
+        "Both paths stop at a pending action owned by the browser session",
+        "Cancel on the card posts confirmed:false (cancelled_by_user)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Guards",
+      "items": [
+        "No LLM tool can confirm; only /api/confirm from the same session executes",
+        "Other session 403, expired 410, already run 409"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Live or local",
+      "items": [
+        "PayPal rows go to the sandbox toolkit after a cached probe; local rows change in memory",
+        "Unknown outcome after dispatch is terminal: check the PayPal dashboard"
+      ]
+    }
+  ]
+}

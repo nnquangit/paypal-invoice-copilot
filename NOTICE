@@ -1,0 +1,8 @@
+Third-party notices
+
+docs/diagrams/*.html embed the Archify diagram viewer (MIT License).
+Copyright (c) 2026 tt-a1i. Copyright (c) 2025 Cocoon AI.
+Source: https://github.com/tt-a1i/archify
+
+docs/media/*.mp4 voiceover generated with Kokoro-82M (hexgrad/Kokoro-82M, Apache-2.0), voice af_heart.
+Video typeface: Inter (SIL Open Font License 1.1). Background music: synthesized locally with ffmpeg.
