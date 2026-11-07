@@ -36,7 +36,7 @@ Workmap: Epic → Feature → Task → Subtask. Update with scripts/workmap.py a
     - [x] `T30` Media licence audit @claude-opus-5-5 (2026-11-07) — edge-tts VO has no output licence (Azure grants rights on paid tier only); music ffmpeg-synth; Inter OFL; Remotion free for individuals; deps permissive (sharp/libvips LGPL)
     - [x] `T31` Free TTS shortlist @claude-opus-5-5 (2026-11-07) — Qwen3-TTS 1.7B CustomVoice (Apache-2.0, speaker Aiden) on 5090; Kokoro-82M (Apache-2.0) fallback; avoid Piper lessac/ryan, F5, XTTS, ElevenLabs free
     - [x] `T33` Re-voice with open TTS @claude-opus-5-5 (2026-11-07) — Kokoro af_heart VO for both videos (13 cues, ~-20 LUFS, ASR-checked); picture unchanged, audio re-mixed with ffmpeg; srt retimed; video/scripts/kokoro-vo.py
-    - [ ] `T34` YouTube re-upload @quangngo (2026-11-07) — replace the public video with docs/media/devpost-demo.mp4 + new srt, keep Public, update the Devpost link if it changes, before 2026-11-12
+    - [x] `T34` YouTube re-upload @quangngo (2026-11-07) — re-uploaded as WAAzFxDIeWk (Public); old UIxG2XZMInI left untouched
 - `4` Ship
   - `P5` Quality gates
     - [x] `T15` npm test + npm run build (2026-11-05) — 9 tests pass; next build ok
@@ -58,5 +58,5 @@ Workmap: Epic → Feature → Task → Subtask. Update with scripts/workmap.py a
     - [x] `T38` Security docs update @claude-opus-5-5-fix (2026-11-07) — README, SUBMISSION Security & limits, docs/security/setup/api.html updated to new behaviour; backups in .agent-reports/doc-backups-code-fixes
   - `P10` Submission update
     - [x] `T39` Verify and test fixes @claude-opus-5-5 (2026-11-07) — npm ci; npm test 73/73 (4 files, offline); tsc clean after a test type fix; next build ok; zero-key runtime checks; docs + SUBMISSION aligned
-    - [>] `T40` Commit and push @claude-opus-5-5 (2026-11-07)
-    - [ ] `T41` Devpost entry update @claude-opus-5-5 (2026-11-07) — needs Chrome review + your approval
+    - [x] `T40` Commit and push @claude-opus-5-5 (2026-11-07) — 52161a5 + 7e11d9e pushed fast-forward to github.com/nnquangit/paypal-invoice-copilot main (2e086a1..7e11d9e); remote readback matches
+    - [x] `T41` Devpost entry update @claude-opus-5-5 (2026-11-07) — Devpost updated 2026-11-08: About (SUBMISSION.md), Built with tags, testing + tech fields, video → youtu.be/WAAzFxDIeWk (Public, Hackathon Challenges, SRT, YouTube checks: no issues); public page read back
